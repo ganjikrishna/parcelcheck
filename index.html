@@ -39,6 +39,8 @@ h1{font-size:46px;line-height:1.05;color:#1d4d33;margin:0 0 10px;font-weight:700
 .report-heading{font-size:20px;color:#1d4d33;margin:28px 0 12px;border-bottom:1px solid #d8cbb0;padding-bottom:6px}
 .report-heading:first-of-type{margin-top:20px}
 .summary{font-weight:700;color:#1d4d33;border-bottom:1px solid #1d4d33;padding-bottom:12px;margin:0 0 16px}
+.counts-line{font-weight:700;color:#26221c;margin:0 0 16px}
+.checking-note{color:#444;margin:0}
 .cached-badge{color:#b3401e;text-transform:uppercase;letter-spacing:.08em;font-size:12px;border:1px solid #b3401e;padding:2px 6px}
 .records-note,.note-box{background:#fdf6e3;border:1px solid #b3401e;padding:12px 16px;margin:16px 0}
 .red-flags,.questions{list-style:none;padding:0;margin:0}
@@ -178,7 +180,7 @@ function statusInfo(status){
 }
 function showError(message){
   var report = document.getElementById("report");
-  if (report) report.innerHTML = '<p class="error">' + esc(message) + '</p>';
+  if (report){ report.innerHTML = '<p class="error">' + esc(message) + '</p>'; report.scrollIntoView({behavior:"smooth", block:"start"}); }
 }
 function renderReport(result, cached){
   var isCached = false;
@@ -199,6 +201,11 @@ function renderReport(result, cached){
   parts.push(' · Run cost ' + esc(costText));
   if (isCached) parts.push(' · <span class="cached-badge">Cached example</span>');
   parts.push('</p>');
+  if (Array.isArray(result.checks) && result.checks.length){
+    var nP = 0, nC = 0, nM = 0;
+    result.checks.forEach(function(c){ if (!c) return; if (c.status === "problem_stated") nP++; else if (c.status === "clean") nC++; else if (c.status === "missing") nM++; });
+    parts.push('<p class="counts-line">Summary: ' + nP + ' red flags stated, ' + nC + ' points stated with no problem, ' + nM + ' points not addressed.</p>');
+  }
   if (result.records_note) parts.push('<div class="records-note note-box">' + esc(result.records_note) + '</div>');
   parts.push('<h3 class="report-heading">Red flags, in their own words</h3>');
   var flags = Array.isArray(result.red_flags) ? result.red_flags : [];
@@ -289,6 +296,16 @@ async function handleCheck(event){
   checking = true;
   var text = textarea ? textarea.value : "";
   if (button){ button.disabled = true; button.textContent = "Checking..."; }
+  var reportBox = document.getElementById("report");
+  var startedAt = Date.now();
+  if (reportBox){
+    reportBox.innerHTML = '<p class="checking-note">Checking against the nine points. Live checks usually take about 10 seconds. <span id="elapsed">Elapsed: 0s</span></p>';
+    reportBox.scrollIntoView({behavior:"smooth", block:"start"});
+  }
+  var elapsedTimer = setInterval(function(){
+    var el = document.getElementById("elapsed");
+    if (el) el.textContent = "Elapsed: " + Math.round((Date.now() - startedAt) / 1000) + "s";
+  }, 1000);
   try {
     var response = await fetch('/check', {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({text: text})});
     if (!response.ok){
@@ -310,6 +327,7 @@ async function handleCheck(event){
   } catch (err){
     showError(err && err.message ? err.message : "Check failed.");
   } finally {
+    clearInterval(elapsedTimer);
     checking = false;
     if (button){ button.disabled = false; button.textContent = "Run the check"; }
   }
@@ -332,6 +350,7 @@ async function loadExample(id){
     showError(err && err.message ? err.message : "Could not load cached example.");
   }
 }
+fetch('/runs').then(function(r){ return r.json(); }).then(function(d){ if (d && typeof d.runs === "number"){ var el = document.getElementById("run-count"); if (el) el.textContent = String(d.runs); } }).catch(function(){});
 if (form) form.addEventListener("submit", handleCheck);
 if (button) button.addEventListener("click", handleCheck);
 document.querySelectorAll("[data-example]").forEach(function(btn){

@@ -478,6 +478,14 @@ export class RunCounter {
     const day = new Date().toISOString().slice(0, 10);
     let s = await storage.get("state");
     if (!s || s.day !== day) s = { day, count: 0 };
+    let peek = false;
+    try {
+      const requestUrl = typeof request === "string" ? request : (request && request.url) || "";
+      peek = new URL(requestUrl).searchParams.get("peek") === "1";
+    } catch {}
+    if (peek) {
+      return new Response(JSON.stringify({ ok: true, count: s.count }), { headers: { "Content-Type": "application/json; charset=utf-8" } });
+    }
     if (s.count >= DAILY_CAP) {
       return new Response(JSON.stringify({ ok: false }), { headers: { "Content-Type": "application/json; charset=utf-8" } });
     }
@@ -497,6 +505,20 @@ function jsonResponse(data, status = 200) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (request.method === "GET" && url.pathname === "/runs") {
+      try {
+        if (!env || !env.RUN_COUNTER) return jsonResponse({ runs: 0 });
+        const counterId = typeof env.RUN_COUNTER.idFromName === "function" ? env.RUN_COUNTER.idFromName("global") : "global";
+        const stub = env.RUN_COUNTER.get(counterId);
+        const resp = await stub.fetch("https://run-counter/?peek=1");
+        let data;
+        if (resp && typeof resp.json === "function") data = await resp.json();
+        else data = resp;
+        return jsonResponse({ runs: data && typeof data.count === "number" ? data.count : 0 });
+      } catch {
+        return jsonResponse({ runs: 0 });
+      }
+    }
     if (request.method === "POST" && url.pathname === "/check") {
       let body;
       try {
@@ -514,6 +536,7 @@ export default {
           return jsonResponse({ error: "That does not look like a listing or an address. Paste a full listing, or type a street address with city, state, and ZIP." }, 400);
         }
       }
+      let capCount;
       if (env && env.RUN_COUNTER) {
         const counterId = typeof env.RUN_COUNTER.idFromName === "function" ? env.RUN_COUNTER.idFromName("global") : "global";
         const stub = env.RUN_COUNTER.get(counterId);
@@ -526,12 +549,14 @@ export default {
         let capData;
         if (capResp && typeof capResp.json === "function") capData = await capResp.json();
         else capData = capResp;
+        if (capData && typeof capData.count === "number") capCount = capData.count;
         if (capData && capData.ok === false) {
           return jsonResponse({ error: "Daily live run cap reached. Cached examples still work." }, 429);
         }
       }
       try {
         const result = await runSmart(env, text, (body && body.id) || "web");
+        if (typeof capCount === "number") result.runs = capCount;
         return jsonResponse(result, 200);
       } catch (e) {
         const msg = e && e.message ? e.message : String(e);

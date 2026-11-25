@@ -6,7 +6,7 @@ because the two records do not fully close: the Billing page already
 showed $0.10 spent at 20:26 ET on 2026-11-24, before the first
 ParcelCheck call at 20:39, so that $0.10 is not ours and is
 unattributed. At 07:34 ET on 2026-11-25 the meter read $0.11. Our
-logged runs itemize to about $0.56 at list rates; the dated entries
+logged runs itemize to about $0.61 at list rates; the dated entries
 below itemize them, including the Muse Ember code build and the demo
 video phase. The
 meter's movement is smaller than the itemization; caching and metering
@@ -25,7 +25,7 @@ Credit allocation: $10.00.
 | Live judge demo reserve (never spent on development) | 2.00 | 0.00 | 2.00 |
 | Final submission day | 1.00 | 0.00 | 1.00 |
 | Unallocated buffer | 1.00 | 0.00 | 1.00 |
-| **Total** | **10.00** | **0.56** | **9.44** |
+| **Total** | **10.00** | **0.61** | **9.39** |
 
 ## Rules
 
@@ -247,3 +247,36 @@ here. (4) Records round 2: ten fresh addresses, sealed key
 (260e8e29...), scored 20 of 20 through the production Worker,
 $0.0172. (5) Live battery after the Worker deploy, about $0.007.
 Itemized logged total is now about $0.56 of the $10.
+
+2026-11-25, about 14:35 to 15:20 ET: UX FIX ROUND, after Vinay pasted
+two real Bethlehem listings into the live page and saw nothing. Cold
+browser testing found the runs completed (4 to 13 seconds) but the
+page never scrolled to the report, gave no progress state beyond the
+button label, led silent listings with two empty sounding sections,
+and showed a run counter that only counted the visitor's own session
+(the server side daily count was real but never exposed; it read 96
+that day). Fixes: the Worker now returns the true daily count with
+each run and serves it at GET /runs without incrementing (Ember,
+$0.0063); the page shows a checking state with a live elapsed counter
+scrolled into view, scrolls errors into view, opens every report
+with a one line summary of flags, clean points, and unaddressed
+points, and loads the true counter on arrival. Ember's first page
+regeneration redesigned the whole page and was rejected; the page
+changes were applied as exact anchored patches to the shipped file
+instead. One handling incident, disclosed: a stale alternate page
+draft sitting in the workspace prep folder was briefly deployed
+over the live page during this round; it was caught within minutes,
+the shipped page was restored from the repo copy (hash verified),
+and the prep folder now syncs from the repo, never the reverse.
+Cold re-test after the fixes passed on desktop and mobile: checking
+state visible, reports and errors in view, summaries correct on live
+runs and all three cached examples, counter true (96 on load, 97
+after one run). A hostile input battery also passed: a planted
+instruction to mark everything clean was ignored on a problem laden
+text (7 problems caught), HTML and unicode inputs handled, the
+20,000 character boundary exact, malformed bodies rejected. Known
+wart left alone on purpose: a bare ZIP code runs an honest all
+missing records report instead of asking for a street address;
+tightening the address gate this close to judging risks rejecting
+real rural addresses. Itemized logged total is now about $0.61 of
+the $10.
