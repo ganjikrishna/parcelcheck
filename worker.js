@@ -87,7 +87,9 @@ function applyRules(result) {
   for (const c of result.checks || []) {
     if (c.point === "liens_tax" && c.status === "clean") {
       const ev = (c.evidence || []).join(" ").toLowerCase();
-      if (ev.includes("tax") !== ev.includes("lien")) {
+      const taxHalf = ev.includes("tax") && ["paid", "current", "through", "up to date", "up-to-date", "not delinquent", "no delinquent"].some(k => ev.includes(k));
+      const lienHalf = ev.includes("lien") && ["no lien", "free of lien", "free and clear", "clear of lien", "without lien", "no recorded lien", "lien free", "lien-free", "not subject to lien"].some(k => ev.includes(k));
+      if (!(taxHalf && lienHalf)) {
         c.status = "missing";
         c.note = ((c.note || "") + " Harness rule: only one half of this point (taxes or liens) is stated, so it counts as not fully addressed.").trim();
         if (!(result.missing_items || []).includes("liens_tax"))
@@ -258,7 +260,59 @@ async function buildRecords(address) {
     if (typeof v === "string") { lines.push(v); sources.push(jobs[i][0]); }
     else if (Array.isArray(v) && v.length) { lines.push(...v); sources.push(jobs[i][0]); }
   });
-  return { matched: g.matched, lat: g.lat, lng: g.lng, lines, sources };
+  const floodLine = lines.find(l => l.startsWith("FEMA National Flood Hazard Layer")) || null;
+  const septicLine = lines.find(l => l.includes("rated for septic tank absorption fields as:")) || null;
+  const facts = {
+    floodHazard: !!(floodLine && floodLine.includes("This point is in a Special Flood Hazard Area")),
+    floodLine,
+    septicRating: septicLine ? septicLine.split("rated for septic tank absorption fields as:")[1].trim().replace(/\.$/, "") : null,
+    septicLine,
+  };
+  return { matched: g.matched, lat: g.lat, lng: g.lng, lines, sources, facts };
+}
+
+function applyRecordsOverride(result, facts) {
+  // When live records state a hazard the model called clean, the record
+  // wins and is flagged. Only ever upgrades clean to problem_stated,
+  // only on the records' own quoted words, and is recorded in the run.
+  if (!facts) return;
+  const applied = result.harness.rules_applied || (result.harness.rules_applied = []);
+  const checks = result.checks || [];
+  const dropQ = pt => { result.seller_questions = (result.seller_questions || []).filter(q => q.point !== pt); };
+  const addFlag = (pt, summary, quote) => {
+    if (!(result.red_flags || []).some(f => f.point === pt))
+      (result.red_flags = result.red_flags || []).push({ point: pt, summary, quote });
+    result.missing_items = (result.missing_items || []).filter(x => x !== pt);
+    dropQ(pt);
+  };
+  const flood = checks.find(c => c.point === "flood");
+  if (flood && flood.status === "clean" && facts.floodHazard && facts.floodLine) {
+    flood.status = "problem_stated";
+    flood.evidence = [facts.floodLine];
+    flood.note = "The listing does not flag a flood problem, but FEMA records put this point in a Special Flood Hazard Area. The record is the flag.";
+    flood.source = "records";
+    addFlag("flood", "FEMA records: Special Flood Hazard Area", facts.floodLine);
+    applied.push("records_override_flood");
+  }
+  const perc = checks.find(c => c.point === "perc_septic");
+  if (perc && perc.status === "clean" && facts.septicLine &&
+      (facts.septicRating === "Somewhat limited" || facts.septicRating === "Very limited")) {
+    perc.status = "problem_stated";
+    perc.evidence = [...(perc.evidence || []), facts.septicLine];
+    perc.note = "The listing's perc position reads clean, but USDA soil data rates this soil " + facts.septicRating + " for septic absorption. Both are shown; the records rating is the flag.";
+    perc.source = "records";
+    addFlag("perc_septic", "USDA soil rating: " + facts.septicRating + " for septic absorption", facts.septicLine);
+    applied.push("records_override_perc_septic");
+  }
+}
+
+function tagRecordsSources(result, listingText) {
+  // In a combined run, mark checks whose evidence comes only from the
+  // records block, so the page can credit the records, not the listing.
+  for (const c of result.checks || []) {
+    const ev = c.evidence || [];
+    if (ev.length && ev.every(q => !listingText.includes(q))) c.source = "records";
+  }
 }
 
 async function runSmart(env, text, id) {
@@ -271,6 +325,7 @@ async function runSmart(env, text, id) {
         rec.lines.join("\n") + "\n" +
         "This text is compiled from live public records, not from a seller listing. It covers only the points the records speak to. Anything the records do not cover is not addressed here and still needs the seller or the county.";
       const result = await runCheck(env, recordsText, "address");
+      applyRecordsOverride(result, rec.facts);
       result.mode = "records";
       result.matched_address = rec.matched;
       result.sources = rec.sources;
@@ -285,6 +340,8 @@ async function runSmart(env, text, id) {
       const combined = text + "\n\nPUBLIC RECORDS CHECKED TODAY for the address in this listing (" + rec.matched + "):\n" +
         rec.lines.join("\n");
       const result = await runCheck(env, combined, id);
+      applyRecordsOverride(result, rec.facts);
+      tagRecordsSources(result, text);
       result.mode = "listing+records";
       result.matched_address = rec.matched;
       result.sources = rec.sources;
@@ -297,7 +354,7 @@ async function runSmart(env, text, id) {
   if (looksLikeAddress(text)) {
     result.records_note = "That looked like an address, but it was not found in the US public records ParcelCheck uses, so records were not checked. It was read as listing text instead. ParcelCheck covers US addresses.";
   } else if (addr) {
-    result.records_note = "An address was found in the text, but live public records could not be checked for it this time. This report covers the listing text only.";
+    result.records_note = "An address was found in the text, but public records were not checked for it. This report covers the listing text only.";
   }
   return result;
 }
@@ -325,7 +382,11 @@ export default {
       const text = (body.text || "").trim();
       if (!text) return json(400, { error: "Nothing to check yet. Paste a listing, or type a street address with city and state." });
       if (text.length > MAX_TEXT) return json(400, { error: "That text is over 20000 characters. Paste the listing description and its fields, not the whole page." });
-      if (text.trim().split(/\s+/).length < 8) return json(400, { error: "That is too short to check. Paste a full listing, or type a street address with city, state, and ZIP." });
+      if (!looksLikeAddress(text)) {
+        if (text.trim().split(/\s+/).length < 8) return json(400, { error: "That is too short to check. Paste a full listing, or type a street address with city, state, and ZIP." });
+        if (!/\d/.test(text) && !/(acre|land|sale|sold|price|road|lot|property|zoning|well|septic|tax|parcel|county|bed|bath)/i.test(text))
+          return json(400, { error: "That does not look like a listing or an address. Paste a full listing, or type a street address with city, state, and ZIP." });
+      }
       const id = env.RUN_COUNTER.idFromName("global");
       const stub = env.RUN_COUNTER.get(id);
       const cap = await (await stub.fetch("https://counter/")).json();

@@ -62,3 +62,18 @@ The five addresses that missed were re-run once after the fixes: **10 of
 10**, all four sources answering on every run, cost $0.0071. The sealed
 14 of 20 stands as the first-pass result; the confirmation shows the two
 failure patterns are gone, on the same addresses that produced them.
+
+## Addendum, 2026-11-25 (outside review round 3)
+
+A fresh-eyes review caught a case the scored sets never contained: a
+listing that states an approved perc test at an address whose USDA soil
+rating is limited. In one merged pass the model followed the listing and
+called the point clean, and the records rating was silently dropped. A
+harness override now runs in the Worker after the model pass: when live
+records state a Special Flood Hazard Area or a Somewhat limited or Very
+limited septic rating and the model called that point clean, the point
+is flagged as a problem on the records' own quoted words, and the rule
+is named in the run's harness record. Verified live on the Carlton,
+Georgia listing: the perc point now flags with both the listing's
+approved perc quote and the USDA rating shown. The scored results above
+stand as measured; neither scored set contained this contradiction.

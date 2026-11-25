@@ -1,124 +1,136 @@
 {
-  "listing_id": "L07",
-  "checks": [
-    {
-      "point": "access",
-      "status": "missing",
-      "evidence": [],
-      "note": "The listing gives a street address but does not state legal road access."
-    },
-    {
-      "point": "flood",
-      "status": "clean",
-      "evidence": [
-        "FEMA National Flood Hazard Layer: the flood zone at this point is Zone X, area of minimal flood hazard. This point is not in a Special Flood Hazard Area."
-      ],
-      "note": "The listing states the flood zone is Zone X and not in a Special Flood Hazard Area."
-    },
-    {
-      "point": "perc_septic",
-      "status": "clean",
-      "evidence": [
-        "Sewer: Perc Test On File.",
-        "Approved perc test for septic system."
-      ],
-      "note": "The listing states an approved perc test for septic system."
-    },
-    {
-      "point": "water_well",
-      "status": "clean",
-      "evidence": [
-        "Water: Private, Well.",
-        "Existing drilled well."
-      ],
-      "note": "The listing states a private well and a drilled well, but does not state its depth."
-    },
-    {
-      "point": "liens_tax",
-      "status": "missing",
-      "evidence": [],
-      "note": "The listing gives a tax amount but does not state lien or tax status."
-    },
-    {
-      "point": "zoning",
-      "status": "missing",
-      "evidence": [],
-      "note": "The listing does not state a zoning code or permitted uses."
-    },
-    {
-      "point": "utilities",
-      "status": "clean",
-      "evidence": [
-        "Utilities: Cable Available, Electricity Available."
-      ],
-      "note": "The listing states cable and electricity are available."
-    },
-    {
-      "point": "mineral_timber",
-      "status": "missing",
-      "evidence": [],
-      "note": "The listing describes wooded land but does not state mineral or timber rights."
-    },
-    {
-      "point": "survey",
-      "status": "missing",
-      "evidence": [],
-      "note": "The listing gives lot size but does not state survey status."
-    }
-  ],
-  "red_flags": [],
-  "missing_items": [
-    "access",
-    "liens_tax",
-    "zoning",
-    "mineral_timber",
-    "survey"
-  ],
-  "seller_questions": [
-    {
-      "point": "access",
-      "question": "Does the parcel have legal road access?"
-    },
-    {
-      "point": "water_well",
-      "question": "What is the depth of the drilled well?"
-    },
-    {
-      "point": "liens_tax",
-      "question": "Are there any liens against the parcel, and is the tax status current?"
-    },
-    {
-      "point": "zoning",
-      "question": "What is the zoning of the parcel, and what uses are permitted?"
-    },
-    {
-      "point": "mineral_timber",
-      "question": "Do mineral and timber rights convey to the buyer?"
-    },
-    {
-      "point": "survey",
-      "question": "Has a survey been completed for the parcel, and can a copy be provided?"
-    }
-  ],
-  "cost": {
-    "usd": 0.003682,
-    "input_tokens": 1751,
-    "output_tokens": 7013,
-    "model": "muse-ember-1.0"
+ "listing_id": "web",
+ "checks": [
+  {
+   "point": "access",
+   "status": "missing",
+   "evidence": [],
+   "note": "Listing does not state legal road access."
   },
-  "harness": {
-    "errors": [],
-    "warnings": [],
-    "seconds": 15.5,
-    "prompt_version": "v1",
-    "rules_applied": []
+  {
+   "point": "flood",
+   "status": "clean",
+   "evidence": [
+    "the flood zone at this point is Zone X, area of minimal flood hazard.",
+    "This point is not in a Special Flood Hazard Area."
+   ],
+   "note": "Listing states Zone X is area of minimal flood hazard and not in a Special Flood Hazard Area.",
+   "source": "records"
   },
-  "mode": "listing+records",
-  "matched_address": "55 DORA BUSH HILL RD, CARLTON, GA, 30627",
-  "sources": [
-    "US Census Bureau geocoder",
-    "FEMA National Flood Hazard Layer",
-    "US Fish and Wildlife Service wetlands inventory",
-    "USDA soil survey"
+  {
+   "point": "perc_septic",
+   "status": "problem_stated",
+   "evidence": [
+    "Sewer: Perc Test On File.",
+    "Approved perc test for septic system.",
+    "USDA soil survey: this soil is rated for septic tank absorption fields as: Somewhat limited."
+   ],
+   "note": "The listing's perc position reads clean, but USDA soil data rates this soil Somewhat limited for septic absorption. Both are shown; the records rating is the flag.",
+   "source": "records"
+  },
+  {
+   "point": "water_well",
+   "status": "clean",
+   "evidence": [
+    "Water: Private, Well.",
+    "Existing drilled well."
+   ],
+   "note": "Listing states a private well and an existing drilled well, but no depth is stated."
+  },
+  {
+   "point": "liens_tax",
+   "status": "missing",
+   "evidence": [],
+   "note": "Listing does not state liens or tax status."
+  },
+  {
+   "point": "zoning",
+   "status": "missing",
+   "evidence": [],
+   "note": "Listing does not state zoning."
+  },
+  {
+   "point": "utilities",
+   "status": "clean",
+   "evidence": [
+    "Utilities: Cable Available, Electricity Available."
+   ],
+   "note": "Listing states cable and electricity are available."
+  },
+  {
+   "point": "mineral_timber",
+   "status": "missing",
+   "evidence": [],
+   "note": "Listing does not state mineral or timber rights."
+  },
+  {
+   "point": "survey",
+   "status": "missing",
+   "evidence": [],
+   "note": "Listing does not state survey status."
+  }
+ ],
+ "red_flags": [
+  {
+   "point": "perc_septic",
+   "summary": "USDA soil rating: Somewhat limited for septic absorption",
+   "quote": "USDA soil survey: this soil is rated for septic tank absorption fields as: Somewhat limited."
+  }
+ ],
+ "missing_items": [
+  "access",
+  "liens_tax",
+  "zoning",
+  "mineral_timber",
+  "survey"
+ ],
+ "seller_questions": [
+  {
+   "point": "access",
+   "question": "Does the property have legal road access?"
+  },
+  {
+   "point": "water_well",
+   "question": "What is the depth of the drilled well?"
+  },
+  {
+   "point": "liens_tax",
+   "question": "Are there any liens on the property, and are taxes current?"
+  },
+  {
+   "point": "zoning",
+   "question": "What is the zoning for the property and what uses are permitted?"
+  },
+  {
+   "point": "mineral_timber",
+   "question": "Are mineral and timber rights included with the property?"
+  },
+  {
+   "point": "survey",
+   "question": "Has a survey been completed for the property and is it available?"
+  }
+ ],
+ "cost": {
+  "usd": 0.003433,
+  "input_tokens": 1845,
+  "output_tokens": 6497,
+  "model": "muse-ember-1.0"
+ },
+ "harness": {
+  "errors": [],
+  "warnings": [],
+  "seconds": 14.2,
+  "prompt_version": "v1",
+  "rules_applied": [
+   "records_override_perc_septic"
   ]
+ },
+ "mode": "listing+records",
+ "matched_address": "55 DORA BUSH HILL RD, CARLTON, GA, 30627",
+ "sources": [
+  "US Census Bureau geocoder",
+  "FEMA National Flood Hazard Layer",
+  "US Fish and Wildlife Service wetlands inventory",
+  "USDA soil survey"
+ ]
 }

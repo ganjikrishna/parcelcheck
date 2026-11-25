@@ -21,6 +21,14 @@ expected = (PREP / "answer-key.sha256").read_text().split()[0]
 assert digest == expected, f"KEY HASH MISMATCH: {digest} vs {expected}"
 print("seal verified:", digest[:16])
 
+# 1b. Key preflight. Without the API key every run fails inside the loop
+# below, and this script would overwrite the published results with
+# zeros. Stop before anything runs or is written.
+if not (PREP / "meta-api-key.txt").exists():
+    print("STOP: meta-api-key.txt not found next to verify.py. "
+          "No runs attempted, no files written.")
+    sys.exit(2)
+
 # 2. Parse key rows
 key_text = (PREP / "answer-key.md").read_text()
 key = {}
@@ -33,6 +41,7 @@ for lid in IDS:
     key[lid] = rows
 
 # 3. Run the checker
+executed = 0
 tot = {"points": 0, "correct": 0, "prob_key": 0, "prob_caught": 0, "false_flags": 0,
        "miss_key": 0, "miss_named": 0, "clean_key": 0, "clean_ok": 0, "usd": 0.0}
 lines = ["# ParcelCheck verification results", "",
@@ -58,6 +67,7 @@ for lid in IDS:
         errs = r["harness"]["errors"] or ["result has no checks key"]
         lines.append(f"## {lid}: INVALID OUTPUT ({'; '.join(errs)[:200]}). Scored as no points matched.")
         lines.append("")
+        executed += 1
         detail[lid] = {"invalid": errs, "cost": r["cost"]}
         tot["usd"] += r["cost"]["usd"]
         tot["points"] += 9
@@ -66,6 +76,7 @@ for lid in IDS:
             if want == "missing": tot["miss_key"] += 1
             if want == "clean": tot["clean_key"] += 1
         continue
+    executed += 1
     got = {c["point"]: c["status"] for c in r["checks"]}
     detail[lid] = {"got": got, "cost": r["cost"], "harness": r["harness"]}
     tot["usd"] += r["cost"]["usd"]
@@ -104,6 +115,10 @@ lines.insert(4, f"**Totals across {tot['points']} points: {tot['correct']} exact
     f"Clean in key: {tot['clean_key']}, called clean: {tot['clean_ok']}. "
     f"Total cost of the ten runs: ${tot['usd']:.4f}.**")
 lines.append("")
+if executed == 0:
+    print("STOP: no listing produced a result (every run failed). "
+          "Published results left untouched.")
+    sys.exit(1)
 (PREP / "verification-results.md").write_text("\n".join(lines))
 (PREP / "verification-detail.json").write_text(json.dumps(detail, indent=2))
 print("\n".join(lines[:8]))

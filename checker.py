@@ -69,15 +69,23 @@ def parse_json(text):
 def apply_rules(result):
     """Deterministic checklist rules, applied openly and recorded in the
     result. liens_tax counts as clean only when the evidence covers both
-    halves of the point (taxes current or paid, and no liens), per
-    checklist.md section 5. A clean call resting on one half is downgraded
+    halves of the point (taxes stated paid or current, and liens stated
+    clear), per checklist.md section 5. A phrase covering neither half
+    (for example "no tax liens") does not count for either. A clean call resting on one half is downgraded
     to missing, and the standard seller question is added if the model
     did not ask it. Nothing else is edited."""
     applied = []
     for c in result.get("checks", []):
         if c.get("point") == "liens_tax" and c.get("status") == "clean":
             ev = " ".join(c.get("evidence", [])).lower()
-            if ("tax" in ev) != ("lien" in ev):
+            tax_half = "tax" in ev and any(k in ev for k in (
+                "paid", "current", "through", "up to date", "up-to-date",
+                "not delinquent", "no delinquent"))
+            lien_half = "lien" in ev and any(k in ev for k in (
+                "no lien", "free of lien", "free and clear", "clear of lien",
+                "without lien", "no recorded lien", "lien free", "lien-free",
+                "not subject to lien"))
+            if not (tax_half and lien_half):
                 c["status"] = "missing"
                 c["note"] = (c.get("note", "") +
                     " Harness rule: only one half of this point (taxes or liens) is stated, so it counts as not fully addressed.").strip()

@@ -198,8 +198,8 @@
   </button>
   <button type="button" class="ex-card" data-example="L07">
     <span class="ex-tag">Example 02 · Cached result</span>
-    <span class="ex-title">Clean in Georgia</span>
-    <span class="ex-sub">5.65 acres in Carlton with a drilled well and an approved perc test. Live records back the flood answer.</span>
+    <span class="ex-title">Clean-looking in Georgia</span>
+    <span class="ex-sub">5.65 acres in Carlton with a drilled well and an approved perc test. USDA soil records flag the septic rating behind that perc, and FEMA backs the flood answer.</span>
   </button>
   <button type="button" class="ex-card" data-example="MB">
     <span class="ex-tag">Example 03 · Address only · Cached result</span>
@@ -277,7 +277,8 @@
         html += '<div class="flag"><span class="flag-point">' + esc(LABELS[f.point] || f.point) + '</span>' +
           '<p class="flag-sum">' + esc(f.summary) + '</p><blockquote>\u201C' + esc(f.quote) + '\u201D</blockquote></div>';
       });
-    } else html += '<p class="empty-note">The listing states no red flags. That is not the same as a clean parcel; read what it leaves out, below.</p>';
+    } else if (r.mode === 'listing') html += '<p class="empty-note">The listing states no red flags. That is not the same as a clean parcel; read what it leaves out, below.</p>';
+    else html += '<p class="empty-note">No red flags stated in the listing or the records. That is not the same as a clean parcel; read what is left out, below.</p>';
     var missTitle = r.mode === 'records' ? 'What the records do not say'
       : r.mode === 'listing+records' ? 'What is still not said' : 'What the listing does not say';
     html += '<h3>' + missTitle + '</h3>';
@@ -310,7 +311,7 @@
         : '<span class="chip chip-missing">Not addressed</span>';
       html += '<div class="pt"><span class="pt-num">' + String(idx + 1).padStart(2, '0') + '</span>' +
         '<div class="pt-main"><span class="pt-name">' + esc(LABELS[p]) + '</span>' +
-        '<div class="pt-note">' + esc(c.note) + '</div></div>' + chip + '</div>';
+        '<div class="pt-note">' + esc(c.note) + (c.source === 'records' ? ' <b>(Public records)</b>' : '') + '</div></div>' + chip + '</div>';
     });
     html += '</div></div></div>';
     results.innerHTML = html;
@@ -322,7 +323,7 @@
       var id = this.getAttribute('data-example');
       box.value = EXAMPLE_TEXT[id];
       status.textContent = 'Loading the recorded result...';
-      fetch('/cached-' + id + '.json').then(function (resp) { return resp.json(); }).then(function (r) {
+      fetch('/cached-' + id + '.json?v=20261125c').then(function (resp) { return resp.json(); }).then(function (r) {
         render(r, 'Recorded live on Ember on Nov 25, 2026, and cached so examples cost nothing to open. Run the same text live with the button above.', 'note-cached');
         status.textContent = '';
         results.scrollIntoView({ behavior: 'smooth', block: 'start' });

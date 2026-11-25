@@ -1,129 +1,128 @@
 {
-  "listing_id": "L01",
-  "checks": [
-    {
-      "point": "access",
-      "status": "problem_stated",
-      "evidence": [
-        "Property is landlocked with no established road access",
-        "Road Frontage: None.",
-        "Roads: None."
-      ],
-      "note": "Listing states the parcel is landlocked with no established road access."
-    },
-    {
-      "point": "flood",
-      "status": "missing",
-      "evidence": [],
-      "note": "Listing does not state flood zone or floodplain status."
-    },
-    {
-      "point": "perc_septic",
-      "status": "missing",
-      "evidence": [],
-      "note": "Listing does not state perc test results or septic feasibility."
-    },
-    {
-      "point": "water_well",
-      "status": "missing",
-      "evidence": [],
-      "note": "Listing does not state a well, well depth, or public water availability."
-    },
-    {
-      "point": "liens_tax",
-      "status": "missing",
-      "evidence": [],
-      "note": "Listing does not state lien status or whether taxes are current."
-    },
-    {
-      "point": "zoning",
-      "status": "clean",
-      "evidence": [
-        "Zoned AU agricultural."
-      ],
-      "note": "Listing states zoning as AU agricultural."
-    },
-    {
-      "point": "utilities",
-      "status": "problem_stated",
-      "evidence": [
-        "no utilities are represented as available",
-        "Utilities: None."
-      ],
-      "note": "Listing states no utilities are represented as available."
-    },
-    {
-      "point": "mineral_timber",
-      "status": "missing",
-      "evidence": [],
-      "note": "Listing does not state mineral or timber rights."
-    },
-    {
-      "point": "survey",
-      "status": "missing",
-      "evidence": [],
-      "note": "Listing does not state a survey status."
-    }
-  ],
-  "red_flags": [
-    {
-      "point": "access",
-      "summary": "Parcel is landlocked with no established road access.",
-      "quote": "Property is landlocked with no established road access"
-    },
-    {
-      "point": "utilities",
-      "summary": "No utilities are represented as available.",
-      "quote": "no utilities are represented as available"
-    }
-  ],
-  "missing_items": [
-    "flood",
-    "perc_septic",
-    "water_well",
-    "liens_tax",
-    "mineral_timber",
-    "survey"
-  ],
-  "seller_questions": [
-    {
-      "point": "flood",
-      "question": "What is the flood zone for this parcel, and is any part of it in a floodplain or special flood hazard area?"
-    },
-    {
-      "point": "perc_septic",
-      "question": "Has a perc test been performed, and are a septic system and its installation feasible or approved for this parcel?"
-    },
-    {
-      "point": "water_well",
-      "question": "What is the water source for this parcel, and if there is a well, what is its depth?"
-    },
-    {
-      "point": "liens_tax",
-      "question": "Are there any liens against this parcel, and are property taxes current with no taxes owed?"
-    },
-    {
-      "point": "mineral_timber",
-      "question": "Are mineral and timber rights included with the sale, or have they been reserved or severed?"
-    },
-    {
-      "point": "survey",
-      "question": "Has a survey been completed for this parcel, and is a survey available?"
-    }
-  ],
-  "cost": {
-    "usd": 0.003596,
-    "input_tokens": 1635,
-    "output_tokens": 6865,
-    "model": "muse-ember-1.0"
+ "listing_id": "web",
+ "checks": [
+  {
+   "point": "access",
+   "status": "problem_stated",
+   "evidence": [
+    "Property is landlocked with no established road access"
+   ],
+   "note": "Listing states the property is landlocked with no established road access."
   },
-  "harness": {
-    "errors": [],
-    "warnings": [],
-    "seconds": 14.7,
-    "prompt_version": "v1",
-    "rules_applied": []
+  {
+   "point": "flood",
+   "status": "missing",
+   "evidence": [],
+   "note": "Listing does not state a flood zone for this parcel."
   },
-  "mode": "listing",
-  "records_note": "An address was found in the text, but live public records could not be checked for it this time. This report covers the listing text only."
+  {
+   "point": "perc_septic",
+   "status": "missing",
+   "evidence": [],
+   "note": "Listing lists Sewer: Septic Tank but does not state a perc test result or septic feasibility."
+  },
+  {
+   "point": "water_well",
+   "status": "missing",
+   "evidence": [],
+   "note": "Listing lists water source as Other but does not state a well or its depth."
+  },
+  {
+   "point": "liens_tax",
+   "status": "missing",
+   "evidence": [],
+   "note": "Listing gives an annual property tax amount but does not state tax status or liens."
+  },
+  {
+   "point": "zoning",
+   "status": "clean",
+   "evidence": [
+    "Zoned AU agricultural.",
+    "Zoning: 9000."
+   ],
+   "note": "Listing states the zoning as AU agricultural."
+  },
+  {
+   "point": "utilities",
+   "status": "problem_stated",
+   "evidence": [
+    "Utilities: None.",
+    "no utilities are represented as available"
+   ],
+   "note": "Listing states no utilities are represented as available and lists Utilities: None."
+  },
+  {
+   "point": "mineral_timber",
+   "status": "missing",
+   "evidence": [],
+   "note": "Listing does not state mineral or timber rights ownership."
+  },
+  {
+   "point": "survey",
+   "status": "missing",
+   "evidence": [],
+   "note": "Listing gives only approximate dimensions and does not state that a survey has been performed."
+  }
+ ],
+ "red_flags": [
+  {
+   "point": "access",
+   "summary": "Property is landlocked with no established road access.",
+   "quote": "Property is landlocked with no established road access"
+  },
+  {
+   "point": "utilities",
+   "summary": "No utilities are represented as available.",
+   "quote": "Utilities: None."
+  }
+ ],
+ "missing_items": [
+  "flood",
+  "perc_septic",
+  "water_well",
+  "liens_tax",
+  "mineral_timber",
+  "survey"
+ ],
+ "seller_questions": [
+  {
+   "point": "flood",
+   "question": "What flood zone is this parcel in, and is any part of it in a floodplain?"
+  },
+  {
+   "point": "perc_septic",
+   "question": "Has a perc test been performed, what were the results, and is septic installation feasible on this parcel?"
+  },
+  {
+   "point": "water_well",
+   "question": "What is the water source for this parcel, is there an existing well, and if so what is its depth?"
+  },
+  {
+   "point": "liens_tax",
+   "question": "Are all property taxes current, and are there any liens or assessments against this parcel?"
+  },
+  {
+   "point": "mineral_timber",
+   "question": "What mineral and timber rights, if any, are included with the sale of this parcel?"
+  },
+  {
+   "point": "survey",
+   "question": "Has a survey been performed for this parcel, and can a copy be provided?"
+  }
+ ],
+ "cost": {
+  "usd": 0.002524,
+  "input_tokens": 1721,
+  "output_tokens": 4703,
+  "model": "muse-ember-1.0"
+ },
+ "harness": {
+  "errors": [],
+  "warnings": [],
+  "seconds": 10.1,
+  "prompt_version": "v1",
+  "rules_applied": []
+ },
+ "mode": "listing",
+ "records_note": "An address was found in the text, but public records were not checked for it. This report covers the listing text only."
 }
