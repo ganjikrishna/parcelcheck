@@ -18,7 +18,7 @@ Credit allocation: $10.00.
 | Live judge demo reserve (never spent on development) | 2.00 | 0.00 | 2.00 |
 | Final submission day | 1.00 | 0.00 | 1.00 |
 | Unallocated buffer | 1.00 | 0.00 | 1.00 |
-| **Total** | **10.00** | **0.00** | **10.00** |
+| **Total** | **10.00** | **0.12** | **9.88** |
 
 ## Rules
 
