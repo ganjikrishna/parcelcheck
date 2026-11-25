@@ -4,6 +4,8 @@ ParcelCheck reads a land listing and tells you what the listing is not telling y
 
 **Live: https://parcelcheck.ganjikrishna.workers.dev** (paste a listing, or open a cached example for free)
 
+**Demo video (2 min, public, Hackathon YT): https://www.youtube.com/watch?v=LKc1XeZ-5VM**
+
 Paste a listing and ParcelCheck checks nine things land buyers get burned on:
 
 1. Legal road access
