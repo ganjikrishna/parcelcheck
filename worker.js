@@ -20,7 +20,30 @@ const DAILY_CAP = 200;
 function parseJson(text) {
   text = text.trim();
   if (text.startsWith("```")) text = text.replace(/^```[a-z]*\n/, "").replace(/```$/, "").trim();
-  return JSON.parse(text);
+  try { return JSON.parse(text); } catch (e) {
+    // Harness fix, 2026-11-25: two failure modes seen on L10, prose
+    // added after the JSON object, and the model echoing the schema
+    // before its result. Scan every object start, take the first
+    // balanced object that carries a top level "checks" key, and
+    // validate as usual. The prompt is unchanged.
+    for (let i = 0; i < text.length; i++) {
+      if (text[i] !== "{") continue;
+      let depth = 0, inStr = false, esc = false, end = -1;
+      for (let j = i; j < text.length; j++) {
+        const ch = text[j];
+        if (inStr) { if (esc) esc = false; else if (ch === "\\") esc = true; else if (ch === '"') inStr = false; continue; }
+        if (ch === '"') inStr = true;
+        else if (ch === "{") depth++;
+        else if (ch === "}") { depth--; if (depth === 0) { end = j; break; } }
+      }
+      if (end === -1) continue;
+      try {
+        const obj = JSON.parse(text.slice(i, end + 1));
+        if (obj && typeof obj === "object" && "checks" in obj) return obj;
+      } catch (_) { /* keep scanning */ }
+    }
+    throw e;
+  }
 }
 
 function validate(result, listingText) {
@@ -77,6 +100,7 @@ async function runCheck(env, listingText, listingId) {
   const i = u.input_tokens || 0, o = u.output_tokens || 0;
   const result = parseJson(text);
   const { errors, warnings } = validate(result, listingText);
+  if (errors.length) throw new Error("Validation failed: " + errors[0]);
   result.cost = { usd: Math.round((i * RATE_IN + o * RATE_OUT) * 1e6) / 1e6,
     input_tokens: i, output_tokens: o, model: MODEL };
   result.harness = { errors, warnings, seconds: Math.round((Date.now() - t0) / 100) / 10, prompt_version: "v1" };
@@ -130,7 +154,15 @@ async function femaLine(lng, lat) {
   try {
     d = await fetchJson("https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?" + q, heads);
   } catch (e) {
-    d = await fetchJson("https://hazards.fema.gov/arcgis/rest/services/FIRMette/NFHLREST_FIRMette/MapServer/20/query?" + q, heads);
+    // FEMA's gateway resets connections intermittently (1 of 10 scored
+    // verification runs lost its flood answer this way). One pause and
+    // retry, then the FIRMette mirror of the same layer.
+    await new Promise(r => setTimeout(r, 900));
+    try {
+      d = await fetchJson("https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28/query?" + q, heads);
+    } catch (e2) {
+      d = await fetchJson("https://hazards.fema.gov/arcgis/rest/services/FIRMette/NFHLREST_FIRMette/MapServer/20/query?" + q, heads);
+    }
   }
   const feats = d.features || [];
   if (!feats.length) return "FEMA National Flood Hazard Layer: no flood hazard data is published for this point.";
@@ -175,7 +207,11 @@ async function soilLines(lng, lat) {
   if (rows.length) {
     const [name, pct, drain, septic] = rows[0];
     if (drain) lines.push("USDA soil survey: the main soil component (" + name + ", " + pct + " percent of the area) has a drainage class of " + String(drain).toLowerCase() + ".");
-    if (septic) lines.push("USDA soil survey: this soil is rated for septic tank absorption fields as: " + septic + ".");
+    // "Not rated" (most urban soils) carries no septic information; the
+    // records verification on 2026-11-25 showed the sentence "rated as:
+    // Not rated" read as a problem flag 5 times out of 5. Omit it, and
+    // the point stays an honest seller question.
+    if (septic && septic !== "Not rated") lines.push("USDA soil survey: this soil is rated for septic tank absorption fields as: " + septic + ".");
   }
   return lines;
 }

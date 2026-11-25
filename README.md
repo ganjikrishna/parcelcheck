@@ -40,6 +40,10 @@ The checker was tested against 12 real listings. Two (L01, L07) were development
 - One listing (L10) produced output that did not parse and scored zero. It is reported, not hidden.
 - Total cost of the ten verification runs: $0.0236
 
+Records mode was verified the same way (`records-verification.md`, key in `records-answer-key.md`, sealed by hash): ten addresses, flood and septic scored, 20 points. First pass: **14 of 20** (flood 9 of 10, septic 5 of 10), $0.0175. The misses had two causes, both fixed in the harness and records assembly with the prompt unchanged: a USDA "Not rated" sentence that read as a septic problem (5 of the misses), and one FEMA gateway drop. A post-fix confirmation run on the five missed addresses scored 10 of 10.
+
+The L10 parse failure was also revisited (addendum in `verification-results.md`): the parser now recovers a result object surrounded by prose or a schema echo, the validator rejects a schema-only reply, and L10 re-ran at 9 of 9 twice. The original scored zero stands in the table above.
+
 ## Budget
 
 Built for the Muse Ember Hackathon (Cerebral Valley), category Scale the Real World. The entire budget was $10 in Meta Model API credits. Every dollar is accounted for in `ledger.md`: development, the call shape test that chose one structured pass over per point calls, the verification runs, and the reserve kept for live judging. Total spent at the time of the verification run: about $0.08.
@@ -64,7 +68,8 @@ The API key is read from `meta-api-key.txt` in the working folder. It is listed 
 - `checklist.md` the nine point diligence list the prompt is built from
 - `listings/` the 12 real listings used for development and verification
 - `answer-key.md`, `answer-key.sha256` the sealed scoring key
-- `verification-results.md`, `verification-detail.json` the scored results
+- `verification-results.md`, `verification-detail.json` the scored results, with the L10 addendum
+- `records-answer-key.md`, `records-answer-key.sha256`, `records-verification.md` the sealed key and scored results for records mode
 - `cached-L01.json`, `cached-L07.json` recorded live results used as page examples
 - `runs.jsonl` the prompt and token trace for every run
 - `ledger.md` the spend ledger

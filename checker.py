@@ -45,7 +45,25 @@ def parse_json(text):
     text = text.strip()
     if text.startswith("```"):
         text = re.sub(r"^```[a-z]*\n|```$", "", text).strip()
-    return json.loads(text)
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        # Harness fix, 2026-11-25: two failure modes seen on L10, prose
+        # added after the JSON object, and the model echoing the schema
+        # before its result. Scan every object start, decode the first
+        # complete object that carries a top level "checks" key, and
+        # validate as usual. The prompt is unchanged.
+        dec = json.JSONDecoder()
+        for i, ch in enumerate(text):
+            if ch != "{":
+                continue
+            try:
+                obj, _ = dec.raw_decode(text[i:])
+            except json.JSONDecodeError:
+                continue
+            if isinstance(obj, dict) and "checks" in obj:
+                return obj
+        raise
 
 def validate(result, listing_text):
     """Harness checks. Returns (errors, warnings). Never edits statuses;
@@ -89,8 +107,20 @@ def check(listing_text, listing_id):
     prompt = json.loads((PREP / "prompt-v1.json").read_text())
     user = ("Check this listing against the nine points. Return only the JSON object.\n\n"
             f'<listing id="{listing_id}">\n{listing_text}\n</listing>')
-    raw, i, o, dt = call_ember(prompt["system"], user)
-    result = parse_json(raw)
+    raw, i, o, dt = call_ember(prompt["system"], user, max_out=12000)
+    try:
+        result = parse_json(raw)
+    except Exception as e:
+        fail = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "listing_id": listing_id,
+                "prompt_version": prompt["version"], "model": MODEL,
+                "input_tokens": i, "output_tokens": o,
+                "usd": round(i * RATE_IN + o * RATE_OUT, 6),
+                "error": "parse failure: " + str(e), "raw_head": raw[:400]}
+        with open(PREP / "runs.jsonl", "a") as f:
+            f.write(json.dumps(fail) + "\n")
+        with open(PREP / "failed-runs.log", "a") as f:
+            f.write(json.dumps(fail) + "\n" + raw + "\n---\n")
+        raise
     errors, warnings = validate(result, listing_text)
     usd = round(i * RATE_IN + o * RATE_OUT, 6)
     result["cost"] = {"usd": usd, "input_tokens": i, "output_tokens": o, "model": MODEL}

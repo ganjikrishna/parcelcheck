@@ -28,3 +28,26 @@ Prompt: v1 (frozen). Model: muse-ember-1.0. One structured pass per listing.
 
 ## L12: 9/9 points match, cost $0.0016
 
+
+## Addendum, 2026-11-25: the L10 failure, revisited
+
+The scored result above stands as run. After it, the harness (not the
+prompt; prompt v1 is unchanged) was hardened against the failure shapes
+L10 produces, and L10 was re-run five times, all logged in runs.jsonl
+($0.0096 total):
+
+- One run returned a clean result with no errors.
+- One run added prose and the schema before its result; the original
+  parser rejected it. The parser now scans for the first complete object
+  carrying a top level "checks" key.
+- One run returned the schema alone; the validator rejected it
+  ("checks must be a list of exactly 9") and, in the production Worker,
+  such a run now returns an error to the visitor instead of an empty
+  report.
+- The last two runs scored **9 of 9** against the sealed key: both
+  problems caught (landlocked access, zoning with no permitted use) and
+  all seven missing points named. Cost $0.0018 each.
+
+L10 remains the listing where Ember is least stable; the harness now
+recovers the recoverable shapes and refuses the rest, instead of
+scoring a silent zero.
