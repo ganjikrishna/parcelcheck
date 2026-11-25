@@ -1,6 +1,7 @@
 # ParcelCheck spend ledger
 
-**Total spent: about $0.17 of the $10 credit, meter side.** Meta Billing
+**Total spent: about $0.61 of the $10 credit (itemized total; the
+dated entries below are the record).** Meta Billing
 is the authority for the credit. The reconciliation, stated plainly
 because the two records do not fully close: the Billing page already
 showed $0.10 spent at 20:26 ET on 2026-11-24, before the first
@@ -17,15 +18,21 @@ Credit allocation: $10.00.
 
 ## Allocation table
 
-| Bucket | Allocated (USD) | Spent (USD) | Remaining (USD) |
-|---|---|---|---|
-| Development | 3.00 | 0.16 | 2.84 |
-| Verification | 2.00 | 0.11 | 1.89 |
-| Demo video | 1.00 | 0.00 | 1.00 |
-| Live judge demo reserve (never spent on development) | 2.00 | 0.00 | 2.00 |
-| Final submission day | 1.00 | 0.00 | 1.00 |
-| Unallocated buffer | 1.00 | 0.00 | 1.00 |
-| **Total** | **10.00** | **0.61** | **9.39** |
+| Item | USD |
+|---|---|
+| Credit (Meta Model API) | 10.00 |
+| Local traced runs, runs.jsonl (72 runs) | 0.2313 |
+| Ember build calls, ember-build/build-runs.jsonl (39 calls) | 0.2064 |
+| Worker-path runs itemized in the entries below (records rounds, cached example recordings, live demos and test batteries) | about 0.17 |
+| **Total spent (itemized)** | **about 0.61** |
+| Live judging reserve, held untouched | 2.00 |
+| Remaining free | about 7.39 |
+
+The earlier version of this table grouped spend into planned buckets
+whose rows were never updated after the first phase; an independent
+review caught that the rows no longer summed to the total. This
+version is built from the trace files and the dated entries, and it
+replaces the bucket table.
 
 ## Rules
 
@@ -280,3 +287,22 @@ missing records report instead of asking for a street address;
 tightening the address gate this close to judging risks rejecting
 real rural addresses. Itemized logged total is now about $0.61 of
 the $10.
+
+2026-11-25, about 14:50 to 15:10 ET: INDEPENDENT REVIEW of the
+finished package by a fresh Claude chat (Vinay's outside-validation
+rule), full pack: repo documents, sealed keys, per-point detail
+files, submission draft, current video description. Every headline
+number recomputed exactly (246 of 270, 30 of 40, 158 of 166, 58 of
+64, $0.0982 scored; all rounds and records scores; all key hashes).
+Findings were documentation faults, all verified against the source
+files before any edit: an erratum for a wrong disclosure about the
+round 2 key's L18 water row (the sealed key scores it problem
+stated; the note had said clean), the harness liens rule proven as
+the cause of the L18 and L22 liens misses in both passes, a sealed
+key disagreement on the natural gas wording disclosed with its
+sensitivity numbers, this table rebuilt from the traces, and stale
+figures corrected in the README and the submission text ($0.56 to
+$0.61, a fifth of a cent to a third of a cent, the false flag
+pattern sentence, the 12 listing framing). No credit spent; the
+review ran on Vinay's Claude Pro subscription, not the hackathon
+credits.

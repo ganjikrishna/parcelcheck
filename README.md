@@ -22,7 +22,7 @@ For each point it reports one of three things: a problem the listing itself stat
 
 ## Why
 
-Land listings are written to sell. The expensive facts, a parcel that is landlocked, a flood zone that forces elevated construction, no perc test, no water, are often present only as silence, or buried in field codes at the bottom of the page. A buyer who does not already know the diligence list does not know what to look for. ParcelCheck hands them the list, the evidence, and the questions, for about a fifth of a cent per check.
+Land listings are written to sell. The expensive facts, a parcel that is landlocked, a flood zone that forces elevated construction, no perc test, no water, are often present only as silence, or buried in field codes at the bottom of the page. A buyer who does not already know the diligence list does not know what to look for. ParcelCheck hands them the list, the evidence, and the questions, for about a third of a cent per check.
 
 ## How it works
 
@@ -32,11 +32,11 @@ Listings go stale, so the live page (a Cloudflare Worker, source in `worker.js`)
 
 ## Verification
 
-The checker was tested against 12 real listings. Two (L01, L07) were development listings used to settle the prompt. The other ten were scored against an answer key written by hand from the listing text and sealed with a SHA-256 hash before any of the ten was run (`answer-key.md`, `answer-key.sha256`). Results, including the misses, are in `verification-results.md`:
+The checker was tested against 32 real listings. Round 1 used 12. Two (L01, L07) were development listings used to settle the prompt. The other ten were scored against an answer key written by hand from the listing text and sealed with a SHA-256 hash before any of the ten was run (`answer-key.md`, `answer-key.sha256`). Results, including the misses, are in `verification-results.md`:
 
 - 78 of 90 points matched the key exactly
 - 9 of 11 stated problems caught
-- 3 false problem flags, all from one pattern: a statement about a single utility (natural gas) read as a statement about utilities in general
+- 3 false problem flags, two from one pattern: a statement about a single utility (natural gas) read as a statement about utilities in general; the third came from "Sewer: None" read as a septic problem
 - 55 of 65 missing points correctly named as missing
 - 14 of 14 clean points correctly called clean
 - One listing (L10) produced output that did not parse and scored zero. It is reported, not hidden.
@@ -49,11 +49,11 @@ The L10 parse failure was also revisited (addendum in `verification-results.md`)
 
 Round 2 widened the set: ten more real listings (L13 to L22, collected Nov 25, 2026) scored against a second sealed key (`answer-key-round2.md`, hash in `answer-key-round2.sha256`), drafted by Muse Ember from the listing texts and the checklist rules, quote-checked by script, and hand-reviewed before sealing. Same frozen prompt, one pass, failed runs standing. Results in `verification-round2-results.md`: 69 of 90 exact, 14 of 19 stated problems caught, 4 false problem flags, 34 of 46 missing points named, 21 of 25 clean points called clean and none flagged as a problem, $0.0368 for the ten runs. One run (L15) failed to parse and scored zero, the same failure shape as L10; two re-runs scored 7 of 9 and are reported as an addendum, not counted. Combined across both rounds: 147 of 180 points exact, 23 of 30 stated problems caught, 89 of 111 missing points named, 35 of 39 clean points called clean, $0.0626 for the twenty scored runs.
 
-Then the checker was hardened against the one failure shape both rounds had shown (an empty or unparseable reply scoring zero): the output cap rose to 24,000 tokens and a failed reply gets one bounded retry, in checker.py and in the production Worker alike. Both sealed sets were re-run under the hardened checker (`verification-recheck-results.md`): 161 of 180 combined, with L10 up from 0 to 8 of 9 and L15 from 0 to 7 of 9, and neither needing the retry. Round 3 (`verification-round3-results.md`) added ten fresh listings (L23 to L32) against a third sealed key: 85 of 90 exact, 7 of 10 stated problems caught, 2 false problem flags, all 55 missing points named, 23 of 25 clean points called clean, $0.0394, with the retry firing on two runs. Current headline across thirty listings under the current checker: 246 of 270 points exact, 30 of 40 stated problems caught, 8 false problem flags, 158 of 166 missing points named, 58 of 64 clean points called clean, $0.0982 for the thirty scored runs. Records mode also got a fresh round on ten untouched addresses (`records-verification-round2.md`): 20 of 20, flood 10 of 10 and septic 10 of 10, $0.0172.
+Then the checker was hardened against the one failure shape both rounds had shown (an empty or unparseable reply scoring zero): the output cap rose to 24,000 tokens and a failed reply gets one bounded retry, in checker.py and in the production Worker alike. Both sealed sets were re-run under the hardened checker (`verification-recheck-results.md`): 161 of 180 combined, with L10 up from 0 to 8 of 9 and L15 from 0 to 7 of 9, and neither needing the retry. Round 3 (`verification-round3-results.md`) added ten fresh listings (L23 to L32) against a third sealed key: 85 of 90 exact, 7 of 10 stated problems caught, 2 false problem flags, all 55 missing points named, 23 of 25 clean points called clean, $0.0394, with the retry firing on two runs. Current headline across thirty listings under the current checker: 246 of 270 points exact, 30 of 40 stated problems caught, 8 false problem flags, 158 of 166 missing points named, 58 of 64 clean points called clean, $0.0982 for the thirty scored runs. Records mode also got a fresh round on ten untouched addresses (`records-verification-round2.md`): 20 of 20, flood 10 of 10 and septic 10 of 10, $0.0172. Two judgment seams between the sealed keys are disclosed in the round results and change no key: the keys disagree on whether "Natural Gas Not Available" is a stated utilities problem (under round 1's reading the headline would be 245 of 270 exact), and two of the round 2 liens misses were caused by the harness's own wording rule rather than the checker's reading (erratum in `verification-round2-results.md`). Across all thirty listings, 2 clean points were flagged as problems, both in round 3.
 
 ## Budget
 
-Built for the Muse Ember Hackathon (Cerebral Valley), category Scale the Real World. The entire budget was $10 in Meta Model API credits. Every dollar is accounted for in `ledger.md`: development, the call shape test that chose one structured pass over per point calls, the verification runs, and the reserve kept for live judging. Total logged spend: about $0.56 of the $10 (see `ledger.md` for the full itemization, including the verification rounds and the hardening work), with $2 of the remainder held untouched as the live judging reserve.
+Built for the Muse Ember Hackathon (Cerebral Valley), category Scale the Real World. The entire budget was $10 in Meta Model API credits. The spend is tracked in `ledger.md`: development, the call shape test that chose one structured pass over per point calls, the verification runs, and the reserve kept for live judging. Total logged spend: about $0.61 of the $10 (see `ledger.md` for the itemization; its records do not fully close against the meter, and it says so), with $2 of the remainder held untouched as the live judging reserve.
 
 ## Run it
 
@@ -74,9 +74,13 @@ The API key is read from `meta-api-key.txt` in the same folder as the scripts (o
 - `checker.py` the checker core: one Ember pass, harness validation, quote check, cost fill, trace log
 - `prompt-v1.md`, `prompt-v1.json` the frozen prompt, schema included
 - `checklist.md` the nine point diligence list the prompt is built from
-- `listings/` the 12 real listings used for development and verification
+- `listings/` the 32 real listings used for development and verification
 - `answer-key.md`, `answer-key.sha256` the sealed scoring key
 - `verification-results.md`, `verification-detail.json` the scored results, with the L10 addendum
+- `answer-key-round2.md`, `verification-round2-results.md`, `verification-round2-detail.json` the second sealed round, with the liens rule erratum
+- `verification-recheck-results.md`, `verification-recheck-detail.json` the re-verification of rounds 1 and 2 under the hardened checker
+- `answer-key-round3.md`, `verification-round3-results.md`, `verification-round3-detail.json` the third sealed round, with the L18 erratum
+- `records-answer-key-round2.md`, `records-verification-round2.md`, `records-spike2.py` the second records round and its spike
 - `records-answer-key.md`, `records-answer-key.sha256`, `records-verification.md` the sealed key and scored results for records mode
 - `cached-L01.json`, `cached-L07.json`, `cached-MB.json` recorded live results used as page examples (the Miami Beach one is an address-only records check)
 - `runs.jsonl` the prompt and token trace for every run

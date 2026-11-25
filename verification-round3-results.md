@@ -11,11 +11,29 @@ The key (answer-key-round3.md) was drafted by Muse Ember from the
 listing texts and checklist.md in ten logged calls ($0.0174), every
 quote verified by script as an exact substring of its listing file, and
 every status hand-reviewed against checklist.md before sealing. No
-draft status needed a hand correction. The review did catch a round 2
-key error, disclosed inside the round 3 key: checklist point 4 lists
-"Well Needed" as problem wording, and round 3 follows that to the
-letter; the sealed round 2 key had keyed the same shape on L18 as
-clean. The checker read it clean too, so no published score changes.
+draft status needed a hand correction.
+
+ERRATUM (added after an independent review, 2026-11-25): the first
+version of this paragraph, and the header note inside the sealed
+round 3 key itself, stated that the round 2 key had scored L18's
+water row ("well would need to be installed") as clean and that the
+checker read it clean too, so no score changed. That was wrong on
+both halves, written from memory without re-reading the sealed key.
+The sealed round 2 key scores that row problem stated (checklist
+point 4 lists "Well Needed" as problem wording, which round 3
+follows to the letter), the round 2 run caught it, and the
+re-verification pass read it missing, a real miss inside the
+re-verified 161 of 180. The round 3 key is sealed and cannot be
+edited, so this erratum is the correction of record.
+
+A second seam between the sealed keys, disclosed the same day: the
+round 1 key adjudicates "Natural Gas Not Available" as missing for
+utilities (gas alone does not speak to utilities in general), while
+this key scores the same words a stated problem (L26). Identical
+checker behavior therefore counts as false flags in round 1 and as
+a catch here. Under the round 1 reading, the combined headline
+across all thirty listings would be 245 of 270 exact, 29 of 39
+stated problems caught, and 9 false problem flags.
 
 Key SHA-256 (sealed before the runs):
 d1b99a93df88abede6ad05d1d508744e2ddcb15730ff155bf7407d694c588def
@@ -37,8 +55,10 @@ Key tally: 10 problem stated, 25 clean, 55 missing across 90 points.
 
 Per listing, exact of 9: L23 9, L24 9, L25 9, L26 9, L27 7, L28 9,
 L29 8, L30 8, L31 9, L32 8. Six listings scored perfectly. The retry
-fired on two runs in this pass (L26 and L30); both produced valid
-reports that would previously have been at risk of scoring zero.
+fired on two runs in this pass (L26 and L30); both completed inside the scored
+pass; under the old cap and single attempt, an empty or invalid
+first reply ended the run, as it did for L10 and L15 in earlier
+rounds.
 
 The five misses, in plain words:
 

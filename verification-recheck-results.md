@@ -3,9 +3,10 @@
 After rounds 1 and 2 were published, the checker was hardened against the
 one failure shape both rounds had shown: a run that returns no usable
 result and scores zero. The two causes were found in failed-runs.log.
-L10's model reply echoed the JSON schema instead of a result. L15's reply
-was empty: the model spent the whole 12,000-token output cap on hidden
-reasoning and returned no text.
+L10's model reply opened with the JSON schema itself, followed by the
+result object, and the parser rejected the pair as extra data. L15's
+reply was empty: the model spent the whole 12,000-token output cap on
+hidden reasoning and returned no text.
 
 The fix, written by Muse Ember from a written spec and verified by
 running it (five offline stub tests covering empty reply, unparseable
@@ -43,6 +44,11 @@ What moved and why, stated plainly:
   passes, and this file is the record of the current checker.
 - No run in this pass needed the retry (all 20 harness blocks show
   attempts: 1).
+- Two of the round 2 misses in this pass are the harness liens rule,
+  not the checker's reading: on L18 and L22 the rule
+  liens_tax_clean_requires_both_halves fired again on the words
+  "clean - no back taxes, no liens", downgrading a clean read to
+  missing. See the erratum in verification-round2-results.md.
 
 One handling disclosure: L22's first output file in this pass was
 corrupted by overlapping writes when a re-run was started while the

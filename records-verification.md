@@ -11,7 +11,10 @@ published.
   limited, Not limited, and Not rated (most urban soils).
 - The answer key (`records-answer-key.md`, sealed before the run at
   SHA-256 c3e44ae65d5aa38434bc58cbd7a283a448a7dbe8c8de2d33682b234a7db6da73,
-  with a wording-only amendment recorded inside it before publication)
+  with a wording-only amendment recorded inside it before publication.
+  The original pre-amendment key text was not retained; only its hash
+  and the amended key are published, so the original seal cannot be
+  independently re-verified. Stated plainly rather than left implicit)
   was built
   from an independent spike (`records-spike.py`): direct calls to the US
   Census geocoder, FEMA NFHL, and USDA Soil Data Access from a separate
