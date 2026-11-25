@@ -26,6 +26,8 @@ Land listings are written to sell. The expensive facts, a parcel that is landloc
 
 One structured call to Muse Ember (Meta Model API) per listing, using the frozen prompt in `prompt-v1.md`. A small harness around the call validates the output before anything is shown: exactly nine points, every problem or clean claim backed by a quote that must appear word for word in the listing text, red flags and missing items consistent with the per point statuses, and a seller question for every missing point. The harness fills in the real cost of the run from the API token counts. Every run is logged in `runs.jsonl` with its prompt version and token counts.
 
+Listings go stale, so the live page (a Cloudflare Worker, source in `worker.js`) also checks public records. One box, nothing to configure: type just an address and the check runs on records alone; paste a listing that contains an address and the records are checked too and merged into the same report. The sources are all free and need no keys: the US Census geocoder finds the point, FEMA's National Flood Hazard Layer gives the flood zone, the USDA soil survey gives the soil, its drainage class, and its septic absorption rating, and the US Fish and Wildlife Service wetlands inventory reports mapped wetlands. The records are compiled into sourced sentences and go through the same Ember pass and the same quote-or-drop validation, so a record can fill a listing's silence but can never be invented. A source that fails adds nothing, and that point stays a seller question.
+
 ## Verification
 
 The checker was tested against 12 real listings. Two (L01, L07) were development listings used to settle the prompt. The other ten were scored against an answer key written by hand from the listing text and sealed with a SHA-256 hash before any of the ten was run (`answer-key.md`, `answer-key.sha256`). Results, including the misses, are in `verification-results.md`:
@@ -55,6 +57,7 @@ The API key is read from `meta-api-key.txt` in the working folder. It is listed 
 ## Files
 
 - `index.html` the one page app: examples with cached results, paste box, live run, cost counter
+- `worker.js` the production Cloudflare Worker: serves the page, runs the same checker, and adds the live public records check (Census, FEMA, USDA, USFWS). The frozen prompt is injected at deploy time from `prompt-v1.json`; the API key is a Worker secret
 - `server.py` local server with an explicit path allowlist (the answer key and the API key are never served) and a daily live run cap
 - `checker.py` the checker core: one Ember pass, harness validation, quote check, cost fill, trace log
 - `prompt-v1.md`, `prompt-v1.json` the frozen prompt, schema included
