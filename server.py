@@ -1,87 +1,176 @@
-#!/usr/bin/env python3
-"""ParcelCheck local server. Serves the page and cached example results,
-and runs live checks through checker.py. Explicit path allowlist: the
-prep folder also holds the API key and the sealed answer key, which are
-never served.
+"""ParcelCheck local-only development server.
 
-Bind: 127.0.0.1:8931 (local only; public exposure is a separate deploy step).
-Caps: listing text max 20000 chars; 200 live runs per day, counted in
-server-cap.json next to this file.
+Serves the ParcelCheck frontend and cached examples from the prep
+folder, bound to 127.0.0.1 port 8931 (local-only, 127.0.0.1:8931).
+
+Only an explicit allowlist is ever served: "/" and "/index.html"
+serve index.html, "/cached-L01.json" serves cached-L01.json, and
+"/cached-L07.json" serves cached-L07.json. The prep folder also
+holds the API key and the sealed answer key, which must never be
+served, so the allowlist is explicit and nothing else in the prep
+folder is served; all other paths return 404.
+
+POST /check runs checker.check for live listings. Caps: listing
+text is limited to 20000 chars, and at most 200 live runs per day
+counted in server-cap.json in the prep folder.
 """
-import json, os, pathlib, time
+
+import json
+import os
+import sys
+import threading
+from datetime import date
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+from urllib.parse import urlparse
 
-PREP = pathlib.Path(os.environ.get("PARCELCHECK_DIR", pathlib.Path(__file__).resolve().parent))
-ALLOWED = {"/": "index.html", "/index.html": "index.html",
-           "/cached-L01.json": "cached-L01.json", "/cached-L07.json": "cached-L07.json"}
-MAX_TEXT = 20000
-DAILY_CAP = 200
+PREP_DIR = Path(os.environ.get("PARCELCHECK_DIR") or Path(__file__).resolve().parent)
+if str(PREP_DIR) not in sys.path:
+    sys.path.insert(0, str(PREP_DIR))
 
-import checker
+import checker  # noqa: E402
 
-def cap_ok():
-    f = PREP / "server-cap.json"
-    today = time.strftime("%Y-%m-%d")
-    try:
-        state = json.loads(f.read_text())
-    except Exception:
-        state = {"day": today, "count": 0}
-    if state.get("day") != today:
-        state = {"day": today, "count": 0}
-    if state["count"] >= DAILY_CAP:
-        return False
-    state["count"] += 1
-    f.write_text(json.dumps(state))
-    return True
+HOST = "127.0.0.1"
+PORT = 8931
+MAX_TEXT_CHARS = 20000
+DAILY_RUN_CAP = 200
+CAP_FILE = PREP_DIR / "server-cap.json"
 
-class H(BaseHTTPRequestHandler):
-    def log_message(self, *a):
-        pass
+ALLOWLIST = {
+    "/": ("index.html", "text/html; charset=utf-8"),
+    "/index.html": ("index.html", "text/html; charset=utf-8"),
+    "/cached-L01.json": ("cached-L01.json", "application/json; charset=utf-8"),
+    "/cached-L07.json": ("cached-L07.json", "application/json; charset=utf-8"),
+}
+
+_cap_lock = threading.Lock()
+
+
+def _consume_daily_run():
+    """Increment the daily counter if under the cap.
+
+    Returns True if a run is allowed (counter incremented and saved
+    before running), False if the daily cap has been reached.
+    """
+    today = date.today().isoformat()
+    with _cap_lock:
+        count = 0
+        try:
+            state = json.loads(CAP_FILE.read_text(encoding="utf-8"))
+            if isinstance(state, dict) and state.get("day") == today:
+                try:
+                    count = int(state.get("count", 0))
+                except (TypeError, ValueError):
+                    count = 0
+        except Exception:
+            count = 0
+        if count >= DAILY_RUN_CAP:
+            return False
+        count += 1
+        try:
+            CAP_FILE.write_text(
+                json.dumps({"day": today, "count": count}), encoding="utf-8"
+            )
+        except Exception:
+            pass
+        return True
+
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        return
+
+    def _send_bytes(self, status, body, content_type):
+        self.send_response(status)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        if body:
+            self.wfile.write(body)
+
+    def _send_json(self, status, obj):
+        body = json.dumps(obj, ensure_ascii=False).encode("utf-8")
+        self._send_bytes(status, body, "application/json; charset=utf-8")
+
+    def _send_not_found(self):
+        self._send_bytes(404, b"Not Found", "text/plain; charset=utf-8")
 
     def do_GET(self):
-        name = ALLOWED.get(self.path)
-        if not name:
-            self.send_error(404)
+        path = urlparse(self.path).path
+        entry = ALLOWLIST.get(path)
+        if entry is None:
+            self._send_not_found()
             return
-        data = (PREP / name).read_bytes()
-        ctype = "text/html" if name.endswith(".html") else "application/json"
-        self.send_response(200)
-        self.send_header("Content-Type", ctype + "; charset=utf-8")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
+        filename, content_type = entry
+        try:
+            data = (PREP_DIR / filename).read_bytes()
+        except OSError:
+            self._send_not_found()
+            return
+        self._send_bytes(200, data, content_type)
 
     def do_POST(self):
-        if self.path != "/check":
-            self.send_error(404)
+        path = urlparse(self.path).path
+        if path != "/check":
+            self._send_not_found()
             return
         try:
-            n = int(self.headers.get("Content-Length", "0"))
-            body = json.loads(self.rfile.read(n) or b"{}")
+            length = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            length = 0
+        raw = self.rfile.read(length) if length > 0 else b""
+        try:
+            body = json.loads(raw.decode("utf-8"))
         except Exception:
-            self.send_error(400)
+            self._send_json(400, {"error": "Bad JSON."})
             return
-        text = (body.get("text") or "").strip()
-        if not text or len(text) > MAX_TEXT:
-            self._json(400, {"error": "Listing text missing or over 20000 characters."})
+        if not isinstance(body, dict):
+            self._send_json(400, {"error": "Bad JSON."})
             return
-        if not cap_ok():
-            self._json(429, {"error": "Daily live run cap reached. Cached examples still work."})
+        raw_text = body.get("text")
+        text = raw_text.strip() if isinstance(raw_text, str) else ""
+        if not text or len(text) > MAX_TEXT_CHARS:
+            self._send_json(
+                400,
+                {"error": "Listing text missing or over 20000 characters."},
+            )
+            return
+        if not _consume_daily_run():
+            self._send_json(
+                429,
+                {"error": "Daily live run cap reached. Cached examples still work."},
+            )
+            return
+        listing_id = body.get("id") or "web"
+        try:
+            result = checker.check(text, listing_id)
+        except Exception as exc:
+            self._send_json(
+                502,
+                {"error": "Checker run failed: " + str(exc)[:200]},
+            )
             return
         try:
-            result = checker.check(text, body.get("id") or "web")
-        except Exception as e:
-            self._json(502, {"error": "Checker run failed: " + str(e)[:200]})
+            payload = json.dumps(result, ensure_ascii=False).encode("utf-8")
+        except Exception as exc:
+            self._send_json(
+                502,
+                {"error": "Checker run failed: " + str(exc)[:200]},
+            )
             return
-        self._json(200, result)
+        self._send_bytes(200, payload, "application/json; charset=utf-8")
 
-    def _json(self, code, obj):
-        data = json.dumps(obj).encode()
-        self.send_response(code)
-        self.send_header("Content-Type", "application/json; charset=utf-8")
-        self.send_header("Content-Length", str(len(data)))
-        self.end_headers()
-        self.wfile.write(data)
+
+ParcelCheckHandler = Handler
+
+
+def main():
+    server = ThreadingHTTPServer((HOST, PORT), Handler)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        pass
+
 
 if __name__ == "__main__":
-    ThreadingHTTPServer(("127.0.0.1", 8931), H).serve_forever()
+    main()

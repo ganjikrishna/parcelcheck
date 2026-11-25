@@ -3,354 +3,340 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ParcelCheck: know what the listing is not telling you</title>
+<title>ParcelCheck — Know what the listing is not telling you, for pennies.</title>
 <style>
-  :root {
-    --paper: #faf7f1;
-    --card: #fffdf8;
-    --ink: #1c211a;
-    --ink-soft: #4c554b;
-    --line: #ddd5c4;
-    --line-dark: #b9ae94;
-    --green: #1f4d2e;
-    --green-soft: #e5efe4;
-    --rust: #a83a24;
-    --rust-soft: #f9e9e3;
-    --amber: #8a6414;
-    --amber-soft: #f6ecd2;
-    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; background: var(--paper); color: var(--ink);
-    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
-    line-height: 1.55; font-size: 16px;
-  }
-  .wrap { max-width: 880px; margin: 0 auto; padding: 0 20px 64px; }
-
-  /* Masthead */
-  header { padding: 34px 0 0; }
-  .kicker {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em;
-    text-transform: uppercase; color: var(--green); margin: 0 0 10px;
-  }
-  h1 {
-    font-family: Georgia, "Times New Roman", serif; font-weight: 700;
-    font-size: 44px; line-height: 1.05; margin: 0; letter-spacing: -0.01em;
-  }
-  h1 .check { color: var(--green); }
-  .tagline {
-    font-family: Georgia, serif; font-style: italic; font-size: 19px;
-    color: var(--ink-soft); margin: 10px 0 0;
-  }
-  .rule { border: none; border-top: 2px solid var(--ink); margin: 22px 0 0; }
-  .rule.thin { border-top: 1px solid var(--line-dark); margin-top: 3px; }
-
-  .lede { font-size: 16.5px; max-width: 68ch; margin: 20px 0 0; }
-  .lede strong { color: var(--green); }
-
-  /* Sections */
-  h2 {
-    font-family: var(--mono); font-size: 12px; letter-spacing: 0.2em;
-    text-transform: uppercase; color: var(--ink); margin: 38px 0 12px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  h2::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
-
-  /* Examples */
-  .examples { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  @media (max-width: 640px) { .examples { grid-template-columns: 1fr; } h1 { font-size: 34px; } }
-  .ex-card {
-    text-align: left; background: var(--card); border: 1px solid var(--line-dark);
-    border-radius: 6px; padding: 16px 18px; cursor: pointer; font: inherit;
-    transition: border-color 0.15s, transform 0.15s;
-  }
-  .ex-card:hover { border-color: var(--green); transform: translateY(-1px); }
-  .ex-card .ex-tag {
-    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.18em;
-    text-transform: uppercase; color: var(--green); display: block; margin-bottom: 6px;
-  }
-  .ex-card .ex-title { font-family: Georgia, serif; font-size: 19px; font-weight: 700; display: block; }
-  .ex-card .ex-sub { color: var(--ink-soft); font-size: 13.5px; display: block; margin-top: 4px; }
-
-  /* Input */
-  textarea {
-    width: 100%; min-height: 190px; padding: 14px 16px; resize: vertical;
-    background: var(--card); color: var(--ink);
-    border: 1px solid var(--line-dark); border-radius: 6px;
-    font-family: var(--mono); font-size: 13px; line-height: 1.5;
-  }
-  textarea:focus { outline: 2px solid var(--green); outline-offset: 1px; }
-  .run-row { display: flex; align-items: center; gap: 16px; margin-top: 14px; flex-wrap: wrap; }
-  .run-btn {
-    background: var(--green); color: #fff; border: none; border-radius: 6px;
-    font: inherit; font-weight: 600; font-size: 15.5px; padding: 12px 22px; cursor: pointer;
-    transition: background 0.15s;
-  }
-  .run-btn:hover { background: #173d24; }
-  .run-btn:disabled { background: #8aa48f; cursor: wait; }
-  #run-status { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); }
-
-  /* Report */
-  #results { margin-top: 40px; }
-  .report {
-    background: var(--card); border: 1px solid var(--line-dark); border-radius: 8px;
-    overflow: hidden;
-  }
-  .report-head {
-    padding: 18px 24px 14px; border-bottom: 2px solid var(--ink);
-    display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap;
-  }
-  .report-head .rh-title {
-    font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.22em; text-transform: uppercase;
-  }
-  .report-head .rh-cost { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); }
-  .report-head .rh-cost b { color: var(--green); font-size: 15px; }
-  .summary-strip {
-    display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line);
-  }
-  .sum-cell { padding: 14px 24px; border-right: 1px solid var(--line); }
-  .sum-cell:last-child { border-right: none; }
-  .sum-num { font-family: Georgia, serif; font-size: 30px; font-weight: 700; line-height: 1; }
-  .sum-lab { font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); margin-top: 5px; }
-  .sum-cell.red .sum-num { color: var(--rust); }
-  .sum-cell.amber .sum-num { color: var(--amber); }
-  .sum-cell.green .sum-num { color: var(--green); }
-  .report-body { padding: 8px 24px 22px; }
-  .report-body h3 {
-    font-family: Georgia, serif; font-size: 20px; margin: 24px 0 8px;
-  }
-  .flag { padding: 12px 0 4px; border-top: 1px solid var(--line); }
-  .flag:first-of-type { border-top: none; }
-  .flag .flag-point {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
-    text-transform: uppercase; color: var(--rust); font-weight: 700;
-  }
-  .flag .flag-sum { font-weight: 600; margin: 3px 0 0; }
-  .flag blockquote {
-    margin: 8px 0 10px; padding: 10px 16px; background: var(--rust-soft);
-    border-left: 3px solid var(--rust); border-radius: 0 4px 4px 0;
-    font-family: Georgia, serif; font-style: italic; font-size: 15.5px;
-  }
-  .note-line {
-    font-size: 13.5px; padding: 9px 13px; border-radius: 4px; margin: 0 0 14px;
-  }
-  .note-cached { background: #eef2fb; border: 1px solid #b9c8e8; color: #2c4470; }
-  .note-live { background: var(--green-soft); border: 1px solid #a9c6ab; color: var(--green); }
-  .note-err { background: var(--rust-soft); border: 1px solid #e0a08c; color: var(--rust); }
-  .plain-list { margin: 6px 0 0; padding-left: 20px; }
-  .plain-list li { margin: 4px 0; }
-  .q-list { list-style: none; margin: 6px 0 0; padding: 0; }
-  .q-list li {
-    padding: 9px 0 9px 30px; position: relative; border-top: 1px solid var(--line);
-  }
-  .q-list li:first-child { border-top: none; }
-  .q-list li::before {
-    content: ""; position: absolute; left: 2px; top: 13px; width: 13px; height: 13px;
-    border: 1.5px solid var(--line-dark); border-radius: 3px; background: var(--paper);
-  }
-  .q-list .q-point { font-weight: 700; }
-  .grid9 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 28px; }
-  @media (max-width: 640px) { .grid9 { grid-template-columns: 1fr; } .summary-strip { grid-template-columns: 1fr 1fr 1fr; } .sum-cell { padding: 12px 14px; } }
-  .pt {
-    display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); align-items: baseline;
-  }
-  .pt-num { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); min-width: 22px; }
-  .pt-main { flex: 1; }
-  .pt-name { font-weight: 700; font-size: 14.5px; }
-  .pt-note { color: var(--ink-soft); font-size: 13.5px; margin-top: 1px; }
-  .chip {
-    font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; font-weight: 700;
-    padding: 3px 8px; border-radius: 99px; white-space: nowrap; text-transform: uppercase;
-  }
-  .chip-problem { background: var(--rust-soft); color: var(--rust); border: 1px solid #e0a08c; }
-  .chip-clean { background: var(--green-soft); color: var(--green); border: 1px solid #a9c6ab; }
-  .chip-missing { background: var(--amber-soft); color: var(--amber); border: 1px solid #ddc078; }
-  .empty-note { color: var(--ink-soft); font-style: italic; }
-  .session-line {
-    font-family: var(--mono); font-size: 12.5px; color: var(--ink-soft); margin-top: 14px; text-align: right;
-  }
-
-  footer {
-    margin-top: 48px; border-top: 1px solid var(--line-dark); padding-top: 16px;
-    font-size: 13px; color: var(--ink-soft); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
-  }
-  footer .f-mono { font-family: var(--mono); font-size: 12px; }
+*{box-sizing:border-box}
+html{margin:0;padding:0}
+body{margin:0;background:#f7f2e9;color:#26221c;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.6}
+.page{max-width:860px;margin:0 auto;padding:48px 24px 64px}
+h1,h2,h3,.tagline,.example-title,.check-point,.flag-point{font-family:Georgia,'Times New Roman',serif}
+.site-header{border-bottom:1px solid #1d4d33;padding-bottom:28px;margin-bottom:32px}
+.section-label{text-transform:uppercase;letter-spacing:.14em;font-size:12px;font-weight:700;color:#1d4d33;margin:0 0 16px;font-family:Georgia,'Times New Roman',serif}
+h1{font-size:46px;line-height:1.05;color:#1d4d33;margin:0 0 10px;font-weight:700}
+.tagline{font-size:22px;line-height:1.35;color:#b3401e;margin:0 0 18px}
+.intro{font-size:17px;margin:0 0 14px;max-width:700px}
+.runs-on{font-size:14px;color:#1d4d33;font-weight:700;margin:0;border-top:1px solid #d8cbb0;padding-top:12px}
+.nine-points{margin-bottom:36px}
+.nine-list{display:grid;grid-template-columns:1fr 1fr;gap:0 32px;list-style:none;padding:0;margin:0;counter-reset:point}
+.nine-list li{counter-increment:point;padding:10px 0 10px 40px;position:relative;border-top:1px solid #d8cbb0;font-size:15px}
+.nine-list li::before{content:counter(point,decimal-leading-zero);position:absolute;left:0;top:12px;color:#b3401e;font-family:Georgia,'Times New Roman',serif;font-size:13px}
+.check-section{margin-bottom:8px}
+.check-section label{display:block;font-weight:700;font-size:14px;margin-bottom:8px;color:#1d4d33}
+#listing-text{width:100%;min-height:150px;padding:14px;border:1px solid #1d4d33;background:#fffdf6;color:#26221c;font:inherit;font-size:15px;line-height:1.55;resize:vertical}
+#listing-text:focus{outline:2px solid #b3401e;outline-offset:1px}
+#run-check{background:#1d4d33;color:#f7f2e9;border:1px solid #1d4d33;padding:12px 24px;font-size:15px;font-weight:700;letter-spacing:.04em;cursor:pointer;margin-top:12px}
+#run-check:hover:not(:disabled){background:#2a6b46}
+#run-check:disabled{opacity:.65;cursor:wait}
+.examples{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px}
+.example-card{background:#fffdf6;border:1px solid #1d4d33;padding:16px;text-align:left;cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column;gap:8px}
+.example-card:hover{border-color:#b3401e}
+.example-card:focus{outline:2px solid #b3401e;outline-offset:2px}
+.example-tag{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:#b3401e;font-weight:700}
+.example-title{font-size:19px;color:#1d4d33;font-weight:700;line-height:1.25}
+.example-sub{font-size:14px;color:#444;line-height:1.5}
+.report{border:1px solid #1d4d33;background:#fffdf6;padding:24px;margin:32px 0 40px}
+.report-placeholder{color:#666;margin:0}
+.report-heading{font-size:20px;color:#1d4d33;margin:28px 0 12px;border-bottom:1px solid #d8cbb0;padding-bottom:6px}
+.report-heading:first-of-type{margin-top:20px}
+.summary{font-weight:700;color:#1d4d33;border-bottom:1px solid #1d4d33;padding-bottom:12px;margin:0 0 16px}
+.cached-badge{color:#b3401e;text-transform:uppercase;letter-spacing:.08em;font-size:12px;border:1px solid #b3401e;padding:2px 6px}
+.records-note,.note-box{background:#fdf6e3;border:1px solid #b3401e;padding:12px 16px;margin:16px 0}
+.red-flags,.questions{list-style:none;padding:0;margin:0}
+.red-flag{border-top:1px solid #d8cbb0;padding:14px 0}
+.flag-point{font-weight:700;color:#1d4d33;margin-bottom:4px}
+.flag-summary{font-size:15px;margin-bottom:6px}
+blockquote{border-left:3px solid #b3401e;margin:8px 0 0;padding:6px 14px;font-family:Georgia,'Times New Roman',serif;font-style:italic;color:#333;background:#fdf0ea}
+.no-flags{font-size:15px}
+.questions li{padding:8px 0;border-top:1px solid #d8cbb0}
+.question-point{font-weight:700;color:#1d4d33}
+.checks-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px}
+.check-cell{border:1px solid #d8cbb0;background:#fff;padding:14px}
+.check-point{font-weight:700;color:#1d4d33;margin-bottom:8px}
+.status-chip,.chip{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.04em;padding:2px 8px;border:1px solid;margin-bottom:8px}
+.status-problem,.chip-problem{color:#b3401e;border-color:#b3401e;background:#fdf0ea}
+.status-clean,.chip-clean{color:#1d4d33;border-color:#1d4d33;background:#eaf2ec}
+.status-missing,.chip-missing,.chip-not-addressed{color:#7a5a00;border-color:#b07a00;background:#fdf6d8}
+.check-note{font-size:14px;margin:0}
+.sources{font-size:13px;color:#555;border-top:1px solid #d8cbb0;padding-top:12px;margin:24px 0 0}
+.error{color:#b3401e;font-weight:700}
+.none{color:#666}
+.how-it-works{border-top:1px solid #1d4d33;padding-top:28px;margin-bottom:36px}
+.how-it-works ul{padding-left:20px;margin:0 0 16px}
+.how-it-works li{margin-bottom:10px}
+.run-counter{font-weight:700;color:#1d4d33;border:1px solid #d8cbb0;background:#fffdf6;padding:10px 14px}
+.site-footer{border-top:1px solid #1d4d33;padding-top:20px;font-size:13px;color:#555}
+.site-footer p{margin:0 0 6px}
+@media (max-width:640px){
+.page{padding:32px 16px 48px}
+h1{font-size:34px}
+.tagline{font-size:19px}
+.examples{grid-template-columns:1fr}
+.nine-list{grid-template-columns:1fr}
+.checks-grid{grid-template-columns:1fr}
+.report{padding:16px}
+}
 </style>
 </head>
 <body>
-<div class="wrap">
-
-<header>
-  <p class="kicker">Land diligence, automated</p>
-  <h1>Parcel<span class="check">Check</span></h1>
-  <p class="tagline">Know what the listing is not telling you, for pennies.</p>
-  <hr class="rule"><hr class="rule thin">
-  <p class="lede">Land listings are written to sell. The expensive facts, no legal road access, a flood zone, no perc test, are usually present only as silence. ParcelCheck reads a listing against <strong>nine diligence points</strong>, quotes its source for every flag, names everything left unsaid, and writes the exact questions to ask the seller. And because listings go stale, whenever an address is in the text it also checks <strong>live public records</strong>: FEMA flood maps, USDA soils, federal wetlands. Type just an address and the records are the check. One check costs about a fifth of a cent on Muse Ember.</p>
+<main class="page">
+<header class="site-header">
+<p class="section-label">Muse Ember · Land diligence</p>
+<h1>ParcelCheck</h1>
+<p class="tagline">Know what the listing is not telling you, for pennies.</p>
+<p class="intro">Paste a land listing, or type just an address, and get a nine point diligence report; every red flag quotes its source word for word; what the text never says becomes the questions to ask.</p>
+<p class="runs-on">Runs on Muse Ember and each live check costs a fraction of a cent.</p>
 </header>
-
-<h2>Start with a real listing</h2>
-<div class="examples">
-  <button type="button" class="ex-card" data-example="L01">
-    <span class="ex-tag">Example 01 · Cached result</span>
-    <span class="ex-title">Landlocked in Florida</span>
-    <span class="ex-sub">One acre near Krome Avenue, Miami-Dade. The listing buries the access problem mid paragraph.</span>
-  </button>
-  <button type="button" class="ex-card" data-example="L07">
-    <span class="ex-tag">Example 02 · Cached result</span>
-    <span class="ex-title">Clean-looking in Georgia</span>
-    <span class="ex-sub">5.65 acres in Carlton with a drilled well and an approved perc test. USDA soil records flag the septic rating behind that perc, and FEMA backs the flood answer.</span>
-  </button>
-  <button type="button" class="ex-card" data-example="MB">
-    <span class="ex-tag">Example 03 · Address only · Cached result</span>
-    <span class="ex-title">An address in Miami Beach</span>
-    <span class="ex-sub">No listing at all. Just an address, checked against live FEMA flood records: Zone AE, a flood problem.</span>
-  </button>
+<section class="nine-points" aria-labelledby="nine-points-heading">
+<h2 id="nine-points-heading" class="section-label">The nine points</h2>
+<ol class="nine-list">
+<li>Legal road access</li>
+<li>Flood zone</li>
+<li>Perc test and septic</li>
+<li>Water source and well</li>
+<li>Liens and tax status</li>
+<li>Zoning</li>
+<li>Utilities at the lot</li>
+<li>Mineral and timber rights</li>
+<li>Survey and boundaries</li>
+</ol>
+</section>
+<section class="check-section" aria-labelledby="check-heading">
+<h2 id="check-heading" class="section-label">Run the check</h2>
+<form id="check-form">
+<label for="listing-text">Listing or address</label>
+<textarea id="listing-text" name="text" placeholder="Paste a land listing, or type just an address..." rows="7"></textarea>
+<button id="run-check" type="submit">Run the check</button>
+</form>
+<div class="examples" aria-label="Cached examples">
+<button type="button" class="example-card" data-example="L01">
+<span class="example-tag">Example 01 · Cached result</span>
+<span class="example-title">Landlocked in Florida</span>
+<span class="example-sub">One acre near Krome Avenue, Miami-Dade. The listing buries the access problem mid paragraph.</span>
+</button>
+<button type="button" class="example-card" data-example="L07">
+<span class="example-tag">Example 02 · Cached result</span>
+<span class="example-title">Clean-looking in Georgia</span>
+<span class="example-sub">5.65 acres in Carlton with a drilled well and an approved perc test. USDA soil records flag the septic rating behind that perc, and FEMA backs the flood answer.</span>
+</button>
+<button type="button" class="example-card" data-example="MB">
+<span class="example-tag">Example 03 · Address only · Cached result</span>
+<span class="example-title">An address in Miami Beach</span>
+<span class="example-sub">No listing at all. Just an address, checked against live FEMA flood records: Zone AE, a flood problem.</span>
+</button>
 </div>
-
-<h2>Or paste any listing, or an address</h2>
-<textarea id="listing-input" placeholder="Paste the full listing text here: description, features, fields and all. The fields at the bottom are where the truth usually hides. Or type just a property address and ParcelCheck will check live public records for it."></textarea>
-<div class="run-row">
-  <button type="button" class="run-btn" id="check-btn">Run a live check on Ember</button>
-  <span id="run-status"></span>
-</div>
-
-<div id="results" aria-live="polite"></div>
-<p class="session-line" id="session-line"></p>
-
-<footer>
-  <span>Built solo for the Muse Ember Hackathon. Tested against 12 real listings; the misses are published with the results.</span>
-  <span class="f-mono">Model: muse-ember-1.0 · Prompt v1 · Every flag quotes its source</span>
+</section>
+<section id="report" class="report" aria-live="polite">
+<p class="report-placeholder">Your nine point diligence report will appear here. Paste a listing above, or choose a cached example.</p>
+</section>
+<section class="how-it-works" aria-labelledby="how-heading">
+<h2 id="how-heading" class="section-label">How it works</h2>
+<ul>
+<li>One structured Muse Ember pass against a nine point checklist written from real land diligence.</li>
+<li>A harness validates every answer before it is shown (nine points, quotes must appear word for word in the source text, flags and questions consistent).</li>
+<li>When the text contains a US address, live public records (US Census geocoder, FEMA flood layer, USDA soil survey, US Fish and Wildlife wetlands inventory) are checked too and merged into the same report.</li>
+<li>Records can fill silence but are never invented.</li>
+<li>Honest limits: it reads text and records, it does not visit the land.</li>
+</ul>
+<p id="run-counter" class="run-counter">Live run counter: <span id="run-count">0</span> live runs</p>
+</section>
+<footer class="site-footer">
+<p>Built for the Meta Muse Ember Hackathon.</p>
+<p>Solo entry.</p>
 </footer>
-
-</div>
-
+</main>
 <script>
-  var EXAMPLE_TEXT = {
-    "L01": "0 SW 52nd Street, Unincorporated, FL 33185\nFor Sale | Agriculture | Active\nPrice: $111,000. 6 Days On Site. Lot Size: 1 Acre. MLS Number: B26101567. Status: Active. Property Tax: $1,351.87.\nSubdivision: MIAMI EVERGLADE LAND COMPANY SUB IN SEC 19. County: Miami-Dade.\n\nApproximately 1 acre (43,560 sq ft) of undeveloped agricultural land in the Miami Everglades Land Co. area near Krome Avenue in unincorporated Miami-Dade County. Approx. 247' x 186' and partially wooded. Zoned AU agricultural. A fit for land investors, neighboring owners, agricultural use, or long-term land banking. Held by the same family for over 30 years; motivated seller seeking a quick sale and will consider a trade for an exotic vehicle. Property is landlocked with no established road access, and no utilities are represented as available. Buyer to independently verify zoning, legal access, easements, permitted uses, environmental restrictions, utilities, and development potential with Miami-Dade County.\n\nGeneral Features: Acres 1. Additional Property Use: Agricultural Unimproved. Property Sub Type: Agriculture. Sewer: Septic Tank. Special Circumstances: Standard. Utilities: None. Water Source: Other. Zoning: 9000. Exterior Features: Fencing None. Other Structures: None. Road Frontage: None. Roads: None. Financing Terms Available: Cash Trade.",
-    "MB": "1700 Convention Center Dr, Miami Beach, FL 33139",
-    "L07": "55 Dora Bush Hill Road, Carlton, GA 30627\nPrice: $125,000. Lot size: 5.65 Acres. Property type: Land. County: Oglethorpe. Status: Active. Days on Market: 1. Last Updated: 11/19/2026. Taxes: $660.48. Utilities: Cable Available, Electricity Available. Water: Private, Well. Sewer: Perc Test On File.\n\nBeautiful 5.65-Acre Wooded Tract - Ready for Your Dream Home! Escape to the peace and tranquility of country living with this beautiful 5.65-acre wooded tract, conveniently located approximately 30 minutes from Athens, Georgia. Surrounded by natural beauty, this property offers the perfect combination of privacy, seclusion, and convenient access to shopping, dining, and entertainment. The property already features a drilled well, a designated building site, and an approved perc test, giving you a valuable head start toward building your dream home. Enjoy the beauty of trees, abundant wildlife, and plenty of space to create your own private retreat. Property Highlights: 5.65 acres of beautiful wooded land. Existing drilled well. Designated building site. Approved perc test for septic system. Peaceful, private country setting. Approximately 30 minutes from Athens, GA. Ideal for a custom-built home or private country retreat."
-  };
-  var LABELS = { access: "Legal road access", flood: "Flood zone", perc_septic: "Perc test and septic",
-    water_well: "Water source and well depth", liens_tax: "Liens and tax status", zoning: "Zoning",
-    utilities: "Utilities", mineral_timber: "Mineral and timber rights", survey: "Survey status" };
-  var ORDER = ["access", "flood", "perc_septic", "water_well", "liens_tax", "zoning", "utilities", "mineral_timber", "survey"];
-  var sessionTotal = 0, sessionRuns = 0;
-  var box = document.getElementById('listing-input');
-  var results = document.getElementById('results');
-  var status = document.getElementById('run-status');
-  var btn = document.getElementById('check-btn');
-
-  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : String(s); return d.innerHTML; }
-  function money(n) { return '$' + Number(n || 0).toFixed(4); }
-
-  function render(r, note, noteClass) {
-    var checks = r.checks || [];
-    var nProblem = checks.filter(function (c) { return c.status === 'problem_stated'; }).length;
-    var nMissing = checks.filter(function (c) { return c.status === 'missing'; }).length;
-    var nClean = checks.filter(function (c) { return c.status === 'clean'; }).length;
-    var html = '<div class="report">';
-    html += '<div class="report-head"><span class="rh-title">Diligence report</span>' +
-      '<span class="rh-cost">This check: <b>' + money(r.cost && r.cost.usd) + '</b> · ' +
-      (r.cost ? r.cost.input_tokens : 0) + ' in / ' + (r.cost ? r.cost.output_tokens : 0) + ' out · ' +
-      esc(r.cost ? r.cost.model : '') + '</span></div>';
-    html += '<div class="summary-strip">' +
-      '<div class="sum-cell red"><div class="sum-num">' + nProblem + '</div><div class="sum-lab">Red flags stated</div></div>' +
-      '<div class="sum-cell amber"><div class="sum-num">' + nMissing + '</div><div class="sum-lab">Points not addressed</div></div>' +
-      '<div class="sum-cell green"><div class="sum-num">' + nClean + '</div><div class="sum-lab">Points in order</div></div></div>';
-    html += '<div class="report-body">';
-    if (note) html += '<p class="note-line ' + noteClass + '">' + esc(note) + '</p>';
-    if (r.mode === 'records' || r.mode === 'listing+records') {
-      html += '<p class="note-line">Live public records checked for <b>' + esc(r.matched_address || '') + '</b>. Sources: ' + esc((r.sources || []).join(' · ')) + '.</p>';
-    }
-    if (r.records_note) {
-      html += '<p class="note-line note-err">' + esc(r.records_note) + '</p>';
-    }
-    if (r.harness && r.harness.errors && r.harness.errors.length) {
-      html += '<p class="note-line note-err">The validation harness flagged this run: ' + esc(r.harness.errors.join('; ')) + '</p>';
-    }
-    var flagsTitle = r.mode === 'records' ? 'Red flags, in the records\u2019 own words'
-      : r.mode === 'listing+records' ? 'Red flags, in their own words' : 'Red flags, in the listing\u2019s own words';
-    html += '<h3>' + flagsTitle + '</h3>';
-    if (r.red_flags && r.red_flags.length) {
-      r.red_flags.forEach(function (f) {
-        html += '<div class="flag"><span class="flag-point">' + esc(LABELS[f.point] || f.point) + '</span>' +
-          '<p class="flag-sum">' + esc(f.summary) + '</p><blockquote>\u201C' + esc(f.quote) + '\u201D</blockquote></div>';
-      });
-    } else if (r.mode === 'listing') html += '<p class="empty-note">The listing states no red flags. That is not the same as a clean parcel; read what it leaves out, below.</p>';
-    else html += '<p class="empty-note">No red flags stated in the listing or the records. That is not the same as a clean parcel; read what is left out, below.</p>';
-    var missTitle = r.mode === 'records' ? 'What the records do not say'
-      : r.mode === 'listing+records' ? 'What is still not said' : 'What the listing does not say';
-    html += '<h3>' + missTitle + '</h3>';
-    if (r.missing_items && r.missing_items.length) {
-      html += '<ul class="plain-list">' + r.missing_items.map(function (p) { return '<li>' + esc(LABELS[p] || p) + '</li>'; }).join('') + '</ul>';
-    } else html += '<p class="empty-note">Nothing. All nine points are addressed.</p>';
-    var qTitle = r.mode === 'records' ? 'Still to verify' : 'Ask the seller';
-    html += '<h3>' + qTitle + '</h3>';
-    var missSet = {};
-    (r.missing_items || []).forEach(function (pp) { missSet[pp] = true; });
-    var mainQs = (r.seller_questions || []).filter(function (q) { return missSet[q.point]; });
-    var extraQs = (r.seller_questions || []).filter(function (q) { return !missSet[q.point]; });
-    if (mainQs.length) {
-      html += '<ul class="q-list">' + mainQs.map(function (q) {
-        return '<li><span class="q-point">' + esc(LABELS[q.point] || q.point) + ':</span> ' + esc(q.question) + '</li>';
-      }).join('') + '</ul>';
-    } else html += '<p class="empty-note">No open questions.</p>';
-    if (extraQs.length) {
-      html += '<h3>Worth a follow-up, on points that are stated</h3>';
-      html += '<ul class="q-list">' + extraQs.map(function (q) {
-        return '<li><span class="q-point">' + esc(LABELS[q.point] || q.point) + ':</span> ' + esc(q.question) + '</li>';
-      }).join('') + '</ul>';
-    }
-    html += '<h3>All nine points</h3><div class="grid9">';
-    ORDER.forEach(function (p, idx) {
-      var c = checks.filter(function (x) { return x.point === p; })[0];
-      if (!c) return;
-      var chip = c.status === 'problem_stated' ? '<span class="chip chip-problem">Problem stated</span>'
-        : c.status === 'clean' ? '<span class="chip chip-clean">In order</span>'
-        : '<span class="chip chip-missing">Not addressed</span>';
-      html += '<div class="pt"><span class="pt-num">' + String(idx + 1).padStart(2, '0') + '</span>' +
-        '<div class="pt-main"><span class="pt-name">' + esc(LABELS[p]) + '</span>' +
-        '<div class="pt-note">' + esc(c.note) + (c.source === 'records' ? ' <b>(Public records)</b>' : '') + '</div></div>' + chip + '</div>';
+const POINT_NAMES = {
+  access: "Legal road access",
+  flood: "Flood zone",
+  perc_septic: "Perc and septic",
+  water_well: "Water and well",
+  liens_tax: "Liens and taxes",
+  zoning: "Zoning",
+  utilities: "Utilities",
+  mineral_timber: "Mineral and timber rights",
+  survey: "Survey and boundaries"
+};
+const EXAMPLE_TEXTS = {
+  L01: "FOR SALE: One acre of vacant land at 0 SW 52nd Street, Unincorporated, FL 33193, near Krome Avenue in west Miami-Dade. This large, flat, wooded lot offers plenty of room to build your dream home, with mature native trees, high ground, and a quiet rural setting away from city traffic. Priced to move and ready for your plans — bring the builder and design your own home with privacy, space, and open sky. The parcel is sold as-is, and while the property fronts open ground toward Krome Avenue, there is no legal road access to the lot and no deeded easement, so buyer must conduct their own diligence on access, survey, zoning, septic, and utilities before purchase. Seller makes no representations. Contact the listing agent for details.",
+  L07: "55 Dora Bush Hill Road, Carlton, GA 30627, Price: $125,000. Lot size: 5.65 Acres. County: Oglethorpe. Taxes: $660.48. Utilities: Cable Available, Electricity Available. Water: Private, Well. Sewer: Perc Test On File. Beautiful 5.65 acre wooded tract with a drilled well, designated building site, and an approved perc test, about 30 minutes from Athens, Georgia. Enjoy privacy, mature trees, and room to build, with a convenient drive to Athens for shopping, dining, and services. A rare opportunity to own a large, quiet parcel in Oglethorpe County with water in place and septic approved. Bring your plans and build your dream home on this beautiful tract.",
+  MB: "1700 Convention Center Dr, Miami Beach, FL 33139"
+};
+const EXAMPLES = EXAMPLE_TEXTS;
+function esc(s){ return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
+function pointName(point){ return POINT_NAMES[point] || String(point || ""); }
+function modeInfo(mode){
+  var m = String(mode || "listing").toLowerCase();
+  if (m.indexOf("combined") !== -1 || m.indexOf("plus") !== -1) return {kind:"combined", label:"Listing plus live records"};
+  if (m.indexOf("records") !== -1) return {kind:"records", label:"Address records only"};
+  return {kind:"listing", label:"Listing only"};
+}
+function statusInfo(status){
+  var s = String(status || "").toLowerCase();
+  if (s.indexOf("problem") !== -1 || s.indexOf("flag") !== -1 || s.indexOf("red") !== -1) return {label:"Problem stated", cls:"status-problem chip-problem"};
+  if (s.indexOf("clean") !== -1 || s.indexOf("ok") !== -1 || s.indexOf("pass") !== -1) return {label:"Clean", cls:"status-clean chip-clean"};
+  return {label:"Not addressed", cls:"status-missing chip-missing chip-not-addressed"};
+}
+function showError(message){
+  var report = document.getElementById("report");
+  if (report) report.innerHTML = '<p class="error">' + esc(message) + '</p>';
+}
+function renderReport(result, cached){
+  var isCached = false;
+  if (cached === true) isCached = true;
+  else if (cached && typeof cached === "object" && cached.cached) isCached = true;
+  else if (result && result.cached === true) isCached = true;
+  var report = document.getElementById("report");
+  if (!report) return;
+  if (!result || typeof result !== "object"){ report.innerHTML = '<p class="error">' + esc("No result returned.") + '</p>'; return; }
+  if (result.error){ report.innerHTML = '<p class="error">' + esc(result.error) + '</p>'; return; }
+  var info = modeInfo(result.mode);
+  var costVal = result.cost && result.cost.usd != null ? parseFloat(result.cost.usd) : NaN;
+  var costText = isNaN(costVal) ? "$0.0000" : "$" + costVal.toFixed(4);
+  var parts = [];
+  parts.push('<div class="report-inner">');
+  parts.push('<p class="summary"><span class="summary-mode">' + esc(info.label) + '</span>');
+  if (result.matched_address) parts.push(' — <span class="matched-address">' + esc(result.matched_address) + '</span>');
+  parts.push(' · Run cost ' + esc(costText));
+  if (isCached) parts.push(' · <span class="cached-badge">Cached example</span>');
+  parts.push('</p>');
+  if (result.records_note) parts.push('<div class="records-note note-box">' + esc(result.records_note) + '</div>');
+  parts.push('<h3 class="report-heading">Red flags, in their own words</h3>');
+  var flags = Array.isArray(result.red_flags) ? result.red_flags : [];
+  if (flags.length){
+    parts.push('<ul class="red-flags">');
+    flags.forEach(function(flag){
+      parts.push('<li class="red-flag">');
+      parts.push('<div class="flag-point">' + esc(pointName(flag && flag.point)) + '</div>');
+      if (flag && flag.summary) parts.push('<div class="flag-summary">' + esc(flag.summary) + '</div>');
+      if (flag && flag.quote) parts.push('<blockquote>' + esc(flag.quote) + '</blockquote>');
+      parts.push('</li>');
     });
-    html += '</div></div></div>';
-    results.innerHTML = html;
-    return r.cost && r.cost.usd ? r.cost.usd : 0;
+    parts.push('</ul>');
+  } else {
+    var noneMsg = info.kind === "listing"
+      ? "The listing states no red flags. That is not the same as a clean parcel; read what it leaves out, below."
+      : "No red flags stated in the listing or the records. That is not the same as a clean parcel; read what is left out, below.";
+    parts.push('<p class="no-flags">' + esc(noneMsg) + '</p>');
   }
-
-  document.querySelectorAll('.ex-card').forEach(function (b) {
-    b.addEventListener('click', function () {
-      var id = this.getAttribute('data-example');
-      box.value = EXAMPLE_TEXT[id];
-      status.textContent = 'Loading the recorded result...';
-      fetch('/cached-' + id + '.json?v=20261125c').then(function (resp) { return resp.json(); }).then(function (r) {
-        render(r, 'Recorded live on Ember on Nov 25, 2026, and cached so examples cost nothing to open. Run the same text live with the button above.', 'note-cached');
-        status.textContent = '';
-        results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  var missing = Array.isArray(result.missing_items) ? result.missing_items : [];
+  var questions = Array.isArray(result.seller_questions) ? result.seller_questions : [];
+  if (questions.length){
+    var stated = questions.filter(function(q){ return q && missing.indexOf(q.point) === -1; });
+    var missingQs = questions.filter(function(q){ return q && missing.indexOf(q.point) !== -1; });
+    parts.push('<h3 class="report-heading">Worth a follow-up, on points that are stated</h3>');
+    if (stated.length){
+      parts.push('<ul class="questions stated-questions">');
+      stated.forEach(function(q){
+        parts.push('<li><span class="question-point">' + esc(pointName(q.point)) + '</span>: <span class="question-text">' + esc(q.question || "") + '</span></li>');
       });
-    });
+      parts.push('</ul>');
+    } else {
+      parts.push('<p class="none">None.</p>');
+    }
+    var missingHeading = info.kind === "records" ? "Still to verify" : "Ask the seller";
+    parts.push('<h3 class="report-heading">' + esc(missingHeading) + '</h3>');
+    if (missingQs.length){
+      parts.push('<ul class="questions missing-questions">');
+      missingQs.forEach(function(q){
+        parts.push('<li><span class="question-point">' + esc(pointName(q.point)) + '</span>: <span class="question-text">' + esc(q.question || "") + '</span></li>');
+      });
+      parts.push('</ul>');
+    } else {
+      parts.push('<p class="none">None.</p>');
+    }
+  }
+  parts.push('<h3 class="report-heading">All nine points</h3>');
+  var checks = Array.isArray(result.checks) ? result.checks : [];
+  parts.push('<div class="checks-grid">');
+  checks.forEach(function(check){
+    var st = statusInfo(check && check.status);
+    parts.push('<div class="check-cell">');
+    parts.push('<div class="check-point">' + esc(pointName(check && check.point)) + '</div>');
+    parts.push('<span class="status-chip chip ' + esc(st.cls) + '">' + esc(st.label) + '</span>');
+    parts.push('<p class="check-note">' + esc(check && check.note ? check.note : ""));
+    if (check && String(check.source || "").toLowerCase() === "records"){
+      parts.push(' <strong>(Public records)</strong>');
+    }
+    parts.push('</p>');
+    parts.push('</div>');
   });
-
-  btn.addEventListener('click', function () {
-    var text = box.value.trim();
-    if (!text) { status.textContent = 'Paste a listing first.'; return; }
-    btn.disabled = true;
-    status.textContent = 'Reading the listing on Ember. This takes about ten seconds.';
-    fetch('/check', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: text, id: 'web' }) })
-      .then(function (resp) { return resp.json().then(function (j) { return { ok: resp.ok, j: j }; }); })
-      .then(function (out) {
-        btn.disabled = false;
-        if (!out.ok) { status.textContent = ''; results.innerHTML = '<p class="note-line note-err">' + esc(out.j.error || 'Run failed.') + '</p>'; return; }
-        var usd = render(out.j, 'Live result, just now, on Muse Ember.', 'note-live');
-        sessionTotal += usd; sessionRuns += 1;
-        document.getElementById('session-line').textContent =
-          'Session: ' + sessionRuns + ' live run' + (sessionRuns > 1 ? 's' : '') + ' · ' + money(sessionTotal) + ' spent';
-        status.textContent = 'Done.';
-        results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      })
-      .catch(function () { btn.disabled = false; status.textContent = ''; results.innerHTML = '<p class="note-line note-err">Could not reach the checker.</p>'; });
-  });
+  parts.push('</div>');
+  if (result.sources && result.sources.length){
+    var sourcesText = Array.isArray(result.sources) ? result.sources.join(", ") : String(result.sources);
+    parts.push('<p class="sources">Records sources: ' + esc(sourcesText) + '</p>');
+  }
+  parts.push('</div>');
+  report.innerHTML = parts.join("");
+}
+function render(result, cached){ return renderReport(result, cached); }
+var liveRuns = 0;
+function updateRunCounter(data){
+  var el = document.getElementById("run-count");
+  if (!el) return;
+  if (data && typeof data.runs === "number") liveRuns = data.runs;
+  else if (data && typeof data.run_count === "number") liveRuns = data.run_count;
+  else if (data && typeof data.count === "number") liveRuns = data.count;
+  else liveRuns += 1;
+  el.textContent = String(liveRuns);
+}
+var textarea = document.getElementById("listing-text");
+var form = document.getElementById("check-form");
+var button = document.getElementById("run-check");
+var checking = false;
+async function handleCheck(event){
+  if (event && event.preventDefault) event.preventDefault();
+  if (checking) return;
+  checking = true;
+  var text = textarea ? textarea.value : "";
+  if (button){ button.disabled = true; button.textContent = "Checking..."; }
+  try {
+    var response = await fetch('/check', {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({text: text})});
+    if (!response.ok){
+      var message = "Check failed.";
+      try {
+        var errData = await response.json();
+        if (errData && typeof errData === "object" && (errData.error || errData.message)) message = errData.error || errData.message;
+        else if (typeof errData === "string" && errData) message = errData;
+      } catch (e){
+        try { var t = await response.text(); if (t) message = t; } catch (e2){}
+      }
+      showError(message);
+      return;
+    }
+    var data = await response.json();
+    if (data && data.error){ showError(data.error); return; }
+    updateRunCounter(data);
+    renderReport(data, false);
+  } catch (err){
+    showError(err && err.message ? err.message : "Check failed.");
+  } finally {
+    checking = false;
+    if (button){ button.disabled = false; button.textContent = "Run the check"; }
+  }
+}
+async function loadExample(id){
+  var text = EXAMPLE_TEXTS[id] || "";
+  if (textarea) textarea.value = text;
+  try {
+    var response = await fetch(`/cached-${id}.json?v=20261125c`);
+    if (!response.ok){
+      var message = "Cached example not found.";
+      try { var errData = await response.json(); if (errData && (errData.error || errData.message)) message = errData.error || errData.message; } catch (e){}
+      showError(message);
+      return;
+    }
+    var data = await response.json();
+    if (data && data.error){ showError(data.error); return; }
+    renderReport(data, true);
+  } catch (err){
+    showError(err && err.message ? err.message : "Could not load cached example.");
+  }
+}
+if (form) form.addEventListener("submit", handleCheck);
+if (button) button.addEventListener("click", handleCheck);
+document.querySelectorAll("[data-example]").forEach(function(btn){
+  btn.addEventListener("click", function(){ loadExample(btn.getAttribute("data-example")); });
+});
 </script>
 </body>
 </html>

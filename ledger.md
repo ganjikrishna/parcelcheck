@@ -19,13 +19,13 @@ Credit allocation: $10.00.
 
 | Bucket | Allocated (USD) | Spent (USD) | Remaining (USD) |
 |---|---|---|---|
-| Development | 3.00 | 0.05 | 2.95 |
-| Verification | 2.00 | 0.08 | 1.92 |
+| Development | 3.00 | 0.16 | 2.84 |
+| Verification | 2.00 | 0.11 | 1.89 |
 | Demo video | 1.00 | 0.00 | 1.00 |
 | Live judge demo reserve (never spent on development) | 2.00 | 0.00 | 2.00 |
 | Final submission day | 1.00 | 0.00 | 1.00 |
 | Unallocated buffer | 1.00 | 0.00 | 1.00 |
-| **Total** | **10.00** | **0.13** | **9.87** |
+| **Total** | **10.00** | **0.29** | **9.71** |
 
 ## Rules
 
@@ -128,3 +128,48 @@ Round 3 fix-round live runs: the Carlton combined run $0.0040, the
 re-recorded page examples $0.0073 (L01 $0.0025, L07 $0.0034, Miami
 Beach $0.0014), and about $0.008 of address, junk, and loophole test
 calls, several of which returned 400 at no cost.
+
+## 2026-11-25, the code rewritten by Muse Ember (Vinay's call)
+
+At Vinay's direction ("use it build", "we should have done this from
+start"), the implementation was recreated by Muse Ember itself.
+Written specifications (behavior only, no existing code) were given to
+Ember through the same Meta Model API, one file at a time, by the
+runner in ember-build/gen.py. Every call is traced in
+ember-build/build-runs.jsonl: 11 calls, $0.111 total, including two
+calls that spent their whole budget on hidden reasoning and returned
+no code (retried with a larger cap) and three fix rounds.
+
+Validation of the Ember-written code, all by running it:
+- checker.py: the eight offline liens cases pass; a fabricated quote
+  is caught by its validate.
+- verify.py: the keyless preflight stops at exit 2 with results
+  untouched. First full run scored 0 because of a truthiness bug
+  (the harness dict tested as the errors); second run crashed on a
+  cost dict added to a number. Both were pinned in the spec and fixed
+  by Ember in logged calls (verify-fix1, verify-fix2). Third run,
+  sandboxed with the sealed key: the full verification completed,
+  86 of 90 exact on that fresh pass, $0.0237. That run validates the
+  code; the published 78 of 90 remains the scored pass and was not
+  overwritten with a luckier re-roll.
+- worker.js: first live battery failed the Georgia case (the soil
+  query used a column name that does not exist, c.name for compname,
+  and an inner join); the fix regeneration then broke the geocoder
+  (read data.addressMatches instead of data.result.addressMatches).
+  Both pinned and fixed by Ember (worker-fix1, worker-fix2). Final
+  battery, all live: Pennsylvania Ave records report; nine junk words
+  400; the liens loophole downgraded with the rule recorded; Carlton
+  combined run flags perc through records_override_perc_septic with
+  all four records sources answering; Miami Beach flood flag. The
+  Ember-written Worker is the production Worker.
+- index.html: Ember-written, deployed; the page and example cards
+  verified live.
+- server.py: Ember-written, compiles and matches its spec on review;
+  a live run was NOT claimed, because port 8931 on Flash is held by
+  the long-running original server and the test requests landed on
+  it. It is a local development artifact only.
+
+Sandbox verification $0.0237 and about $0.02 of live battery runs
+bring this phase to about $0.16. The backups of the previous
+implementation sit on Flash as worker.src.js.bak-pre-ember and
+index.html.bak-pre-ember.
