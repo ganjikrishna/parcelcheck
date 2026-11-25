@@ -1,0 +1,526 @@
+{
+ "totals": {
+  "exact": 69,
+  "points": 90,
+  "prob_key": 19,
+  "prob_caught": 14,
+  "false_prob": 4,
+  "miss_key": 46,
+  "miss_named": 34,
+  "clean_key": 25,
+  "clean_ok": 21,
+  "clean_flagged": 0
+ },
+ "listings": {
+  "L13": {
+   "failed_run": false,
+   "exact": 7,
+   "rows": {
+    "access": {
+     "key": "problem_stated",
+     "got": "problem_stated",
+     "exact": true
+    },
+    "flood": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "perc_septic": {
+     "key": "missing",
+     "got": "problem_stated",
+     "exact": false
+    },
+    "water": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "liens_tax": {
+     "key": "missing",
+     "got": "problem_stated",
+     "exact": false
+    },
+    "zoning": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "utilities": {
+     "key": "problem_stated",
+     "got": "problem_stated",
+     "exact": true
+    },
+    "mineral_timber": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "survey": {
+     "key": "problem_stated",
+     "got": "problem_stated",
+     "exact": true
+    }
+   }
+  },
+  "L14": {
+   "failed_run": false,
+   "exact": 9,
+   "rows": {
+    "access": {
+     "key": "problem_stated",
+     "got": "problem_stated",
+     "exact": true
+    },
+    "flood": {
+     "key": "problem_stated",
+     "got": "problem_stated",
+     "exact": true
+    },
+    "perc_septic": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "water": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "liens_tax": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "zoning": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "utilities": {
+     "key": "problem_stated",
+     "got": "problem_stated",
+     "exact": true
+    },
+    "mineral_timber": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "survey": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    }
+   }
+  },
+  "L15": {
+   "failed_run": true,
+   "exact": 0,
+   "rows": {
+    "access": {
+     "key": "problem_stated",
+     "got": "NO_RESULT",
+     "exact": false
+    },
+    "flood": {
+     "key": "missing",
+     "got": "NO_RESULT",
+     "exact": false
+    },
+    "perc_septic": {
+     "key": "missing",
+     "got": "NO_RESULT",
+     "exact": false
+    },
+    "water": {
+     "key": "problem_stated",
+     "got": "NO_RESULT",
+     "exact": false
+    },
+    "liens_tax": {
+     "key": "missing",
+     "got": "NO_RESULT",
+     "exact": false
+    },
+    "zoning": {
+     "key": "problem_stated",
+     "got": "NO_RESULT",
+     "exact": false
+    },
+    "utilities": {
+     "key": "missing",
+     "got": "NO_RESULT",
+     "exact": false
+    },
+    "mineral_timber": {
+     "key": "missing",
+     "got": "NO_RESULT",
+     "exact": false
+    },
+    "survey": {
+     "key": "missing",
+     "got": "NO_RESULT",
+     "exact": false
+    }
+   }
+  },
+  "L16": {
+   "failed_run": false,
+   "exact": 9,
+   "rows": {
+    "access": {
+     "key": "problem_stated",
+     "got": "problem_stated",
+     "exact": true
+    },
+    "flood": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "perc_septic": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "water": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "liens_tax": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "zoning": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "utilities": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "mineral_timber": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "survey": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    }
+   }
+  },
+  "L17": {
+   "failed_run": false,
+   "exact": 9,
+   "rows": {
+    "access": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "flood": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "perc_septic": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "water": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "liens_tax": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "zoning": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "utilities": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "mineral_timber": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "survey": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    }
+   }
+  },
+  "L18": {
+   "failed_run": false,
+   "exact": 6,
+   "rows": {
+    "access": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "flood": {
+     "key": "problem_stated",
+     "got": "clean",
+     "exact": false
+    },
+    "perc_septic": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "water": {
+     "key": "problem_stated",
+     "got": "problem_stated",
+     "exact": true
+    },
+    "liens_tax": {
+     "key": "clean",
+     "got": "missing",
+     "exact": false
+    },
+    "zoning": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "utilities": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "mineral_timber": {
+     "key": "clean",
+     "got": "missing",
+     "exact": false
+    },
+    "survey": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    }
+   }
+  },
+  "L19": {
+   "failed_run": false,
+   "exact": 8,
+   "rows": {
+    "access": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "flood": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "perc_septic": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "water": {
+     "key": "problem_stated",
+     "got": "problem_stated",
+     "exact": true
+    },
+    "liens_tax": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "zoning": {
+     "key": "missing",
+     "got": "clean",
+     "exact": false
+    },
+    "utilities": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "mineral_timber": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "survey": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    }
+   }
+  },
+  "L20": {
+   "failed_run": false,
+   "exact": 7,
+   "rows": {
+    "access": {
+     "key": "problem_stated",
+     "got": "problem_stated",
+     "exact": true
+    },
+    "flood": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "perc_septic": {
+     "key": "missing",
+     "got": "problem_stated",
+     "exact": false
+    },
+    "water": {
+     "key": "problem_stated",
+     "got": "problem_stated",
+     "exact": true
+    },
+    "liens_tax": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "zoning": {
+     "key": "missing",
+     "got": "clean",
+     "exact": false
+    },
+    "utilities": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "mineral_timber": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "survey": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    }
+   }
+  },
+  "L21": {
+   "failed_run": false,
+   "exact": 8,
+   "rows": {
+    "access": {
+     "key": "problem_stated",
+     "got": "problem_stated",
+     "exact": true
+    },
+    "flood": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "perc_septic": {
+     "key": "missing",
+     "got": "problem_stated",
+     "exact": false
+    },
+    "water": {
+     "key": "problem_stated",
+     "got": "problem_stated",
+     "exact": true
+    },
+    "liens_tax": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "zoning": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "utilities": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "mineral_timber": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    },
+    "survey": {
+     "key": "missing",
+     "got": "missing",
+     "exact": true
+    }
+   }
+  },
+  "L22": {
+   "failed_run": false,
+   "exact": 6,
+   "rows": {
+    "access": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "flood": {
+     "key": "problem_stated",
+     "got": "clean",
+     "exact": false
+    },
+    "perc_septic": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "water": {
+     "key": "problem_stated",
+     "got": "problem_stated",
+     "exact": true
+    },
+    "liens_tax": {
+     "key": "clean",
+     "got": "missing",
+     "exact": false
+    },
+    "zoning": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "utilities": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    },
+    "mineral_timber": {
+     "key": "clean",
+     "got": "missing",
+     "exact": false
+    },
+    "survey": {
+     "key": "clean",
+     "got": "clean",
+     "exact": true
+    }
+   }
+  }
+ }
+}

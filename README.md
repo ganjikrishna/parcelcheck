@@ -47,6 +47,8 @@ Records mode was verified the same way (`records-verification.md`, key in `recor
 
 The L10 parse failure was also revisited (addendum in `verification-results.md`): the parser now recovers a result object surrounded by prose or a schema echo, the validator rejects a schema-only reply, and L10 re-ran at 9 of 9 twice. The original scored zero stands in the table above.
 
+Round 2 widened the set: ten more real listings (L13 to L22, collected Nov 25, 2026) scored against a second sealed key (`answer-key-round2.md`, hash in `answer-key-round2.sha256`), drafted by Muse Ember from the listing texts and the checklist rules, quote-checked by script, and hand-reviewed before sealing. Same frozen prompt, one pass, failed runs standing. Results in `verification-round2-results.md`: 69 of 90 exact, 14 of 19 stated problems caught, 4 false problem flags, 34 of 46 missing points named, 21 of 25 clean points called clean and none flagged as a problem, $0.0368 for the ten runs. One run (L15) failed to parse and scored zero, the same failure shape as L10; two re-runs scored 7 of 9 and are reported as an addendum, not counted. Combined across both rounds: 147 of 180 points exact, 23 of 30 stated problems caught, 89 of 111 missing points named, 35 of 39 clean points called clean, $0.0626 for the twenty scored runs.
+
 ## Budget
 
 Built for the Muse Ember Hackathon (Cerebral Valley), category Scale the Real World. The entire budget was $10 in Meta Model API credits. Every dollar is accounted for in `ledger.md`: development, the call shape test that chose one structured pass over per point calls, the verification runs, and the reserve kept for live judging. Total spent at the time of the verification run: about $0.08.
