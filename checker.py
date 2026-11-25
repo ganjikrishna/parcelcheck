@@ -381,16 +381,69 @@ def check(listing_text, listing_id):
     prompt_version = prompt_data.get("version")
     system = prompt_data.get("system")
     user = f"Check this listing against the nine points. Return only the JSON object.\n\n<listing id=\"{listing_id}\">\n{listing_text}\n</listing>"
-    raw_text, input_tokens, output_tokens, elapsed = call_ember(system, user, max_out=12000)
-    if not isinstance(raw_text, str):
-        raw_text = str(raw_text)
-    usd = _usd(input_tokens, output_tokens)
     ts = datetime.datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%S%z")
 
-    try:
-        result = parse_json(raw_text)
-    except Exception as exc:
-        trace = {
+    total_input_tokens = 0
+    total_output_tokens = 0
+    total_usd = 0
+    total_elapsed = 0
+    attempts = 0
+
+    result = None
+    rules_applied = []
+    errors = []
+    warnings = []
+
+    last_exc = None
+    last_error = None
+    last_raw_text = ""
+
+    for attempt in range(1, 3):
+        attempts = attempt
+        raw_text, input_tokens, output_tokens, elapsed = call_ember(system, user, max_out=24000)
+        if not isinstance(raw_text, str):
+            raw_text = str(raw_text)
+        usd = _usd(input_tokens, output_tokens)
+        total_input_tokens += input_tokens or 0
+        total_output_tokens += output_tokens or 0
+        total_usd += usd
+        total_elapsed += elapsed or 0
+
+        attempt_result = None
+        attempt_rules_applied = []
+        attempt_errors = []
+        attempt_warnings = []
+        attempt_exc = None
+        attempt_error = None
+
+        if not raw_text.strip():
+            attempt_exc = ValueError("empty reply")
+            attempt_error = "empty reply"
+        else:
+            try:
+                attempt_result = parse_json(raw_text)
+            except Exception as exc:
+                attempt_exc = exc
+                attempt_error = f"parse failure: {exc}"
+            else:
+                attempt_rules_applied = apply_rules(attempt_result)
+                attempt_errors, attempt_warnings = validate(attempt_result, listing_text)
+                if attempt_errors:
+                    attempt_exc = ValueError(f"validation failed: {attempt_errors}")
+                    attempt_error = f"validation failed: {attempt_errors}"
+
+        if attempt_exc is None:
+            result = attempt_result
+            rules_applied = attempt_rules_applied
+            errors = attempt_errors
+            warnings = attempt_warnings
+            break
+
+        last_exc = attempt_exc
+        last_error = attempt_error
+        last_raw_text = raw_text
+
+        failed_trace = {
             "ts": ts,
             "listing_id": listing_id,
             "prompt_version": prompt_version,
@@ -398,45 +451,65 @@ def check(listing_text, listing_id):
             "input_tokens": input_tokens,
             "output_tokens": output_tokens,
             "usd": usd,
-            "error": f"parse failure: {exc}",
+            "error": attempt_error,
             "raw_head": raw_text[:400],
         }
-        with open(prep / "runs.jsonl", "a", encoding="utf-8") as fh:
-            fh.write(json.dumps(trace) + "\n")
-        failed_entry = dict(trace)
+        failed_entry = dict(failed_trace)
         failed_entry["raw"] = raw_text
         failed_entry["raw_reply"] = raw_text
-        with open(prep / "failed-runs.log", "a", encoding="utf-8") as fh:
-            fh.write(json.dumps(failed_entry) + "\n")
-            fh.write(raw_text + "\n")
-        raise
 
-    rules_applied = apply_rules(result)
-    errors, warnings = validate(result, listing_text)
+        if attempt < 2:
+            with open(prep / "failed-runs.log", "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(failed_entry) + "\n")
+                fh.write(raw_text + "\n")
+        else:
+            trace = {
+                "ts": ts,
+                "listing_id": listing_id,
+                "prompt_version": prompt_version,
+                "model": MODEL,
+                "input_tokens": total_input_tokens,
+                "output_tokens": total_output_tokens,
+                "usd": total_usd,
+                "error": last_error,
+                "raw_head": last_raw_text[:400],
+                "attempts": 2,
+            }
+            with open(prep / "runs.jsonl", "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(trace) + "\n")
+            with open(prep / "failed-runs.log", "a", encoding="utf-8") as fh:
+                fh.write(json.dumps(failed_entry) + "\n")
+                fh.write(raw_text + "\n")
+            raise last_exc
+
     result["cost"] = {
-        "usd": usd,
-        "input_tokens": input_tokens,
-        "output_tokens": output_tokens,
+        "usd": total_usd,
+        "input_tokens": total_input_tokens,
+        "output_tokens": total_output_tokens,
         "model": MODEL,
     }
     result["harness"] = {
         "errors": errors,
         "warnings": warnings,
-        "seconds": elapsed,
+        "seconds": total_elapsed,
         "prompt_version": prompt_version,
         "rules_applied": rules_applied,
+        "attempts": attempts,
+        "retried": attempts == 2,
     }
     trace = {
         "ts": ts,
         "listing_id": listing_id,
         "prompt_version": prompt_version,
         "model": MODEL,
-        "input_tokens": input_tokens,
-        "output_tokens": output_tokens,
-        "usd": usd,
+        "input_tokens": total_input_tokens,
+        "output_tokens": total_output_tokens,
+        "usd": total_usd,
         "errors": errors,
         "warnings": warnings,
         "rules_applied": rules_applied,
+        "attempts": attempts,
+        "retried": attempts == 2,
     }
     with open(prep / "runs.jsonl", "a", encoding="utf-8") as fh:
         fh.write(json.dumps(trace) + "\n")

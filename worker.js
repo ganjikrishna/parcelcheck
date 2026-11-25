@@ -136,59 +136,82 @@ function applyRules(result) {
 async function runCheck(env, listingText, listingId) {
   const start = Date.now();
   const user = `Check this listing against the nine points. Return only the JSON object.\n\n<listing id="${listingId}">\n${listingText}\n</listing>`;
-  const resp = await fetch(API, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${env.META_API_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      input: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: user }
-      ],
-      max_output_tokens: 12000,
-      store: false
-    })
-  });
-  if (!resp.ok) throw new Error(`Ember API ${resp.status}`);
-  const data = await resp.json();
-  let outputText = "";
-  if (data && Array.isArray(data.output)) {
-    for (const item of data.output) {
-      if (item && Array.isArray(item.content)) {
-        for (const part of item.content) {
-          if (part && part.type === "output_text" && typeof part.text === "string") outputText += part.text;
-        }
-      }
-    }
-    if (!outputText) {
+  let totalInputTokens = 0;
+  let totalOutputTokens = 0;
+  let totalUsd = 0;
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const resp = await fetch(API, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${env.META_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        input: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: user }
+        ],
+        max_output_tokens: 24000,
+        store: false
+      })
+    });
+    if (!resp.ok) throw new Error(`Ember API ${resp.status}`);
+    const data = await resp.json();
+    const attemptInputTokens = (data.usage && (data.usage.input_tokens ?? data.usage.inputTokens)) || 0;
+    const attemptOutputTokens = (data.usage && (data.usage.output_tokens ?? data.usage.outputTokens)) || 0;
+    const attemptUsd = Math.round(((attemptInputTokens / 1000000) * INPUT_USD_PER_MILLION + (attemptOutputTokens / 1000000) * OUTPUT_USD_PER_MILLION) * 1000000) / 1000000;
+    totalInputTokens += attemptInputTokens;
+    totalOutputTokens += attemptOutputTokens;
+    totalUsd += attemptUsd;
+    let outputText = "";
+    if (data && Array.isArray(data.output)) {
       for (const item of data.output) {
         if (item && Array.isArray(item.content)) {
           for (const part of item.content) {
-            if (part && typeof part.text === "string") outputText += part.text;
+            if (part && part.type === "output_text" && typeof part.text === "string") outputText += part.text;
+          }
+        }
+      }
+      if (!outputText) {
+        for (const item of data.output) {
+          if (item && Array.isArray(item.content)) {
+            for (const part of item.content) {
+              if (part && typeof part.text === "string") outputText += part.text;
+            }
           }
         }
       }
     }
+    if (!outputText.trim()) {
+      if (attempt === 2) throw new Error("Empty reply from model");
+      continue;
+    }
+    let result;
+    try {
+      result = parseJson(outputText);
+    } catch (e) {
+      if (attempt === 2) throw e;
+      continue;
+    }
+    const rules_applied = applyRules(result);
+    const { errors, warnings } = validate(result, listingText);
+    if (errors.length) {
+      if (attempt === 2) throw new Error(`Validation failed: ${errors[0]}`);
+      continue;
+    }
+    result.cost = { usd: totalUsd, input_tokens: totalInputTokens, output_tokens: totalOutputTokens, model: MODEL };
+    result.harness = {
+      errors,
+      warnings,
+      seconds: parseFloat(((Date.now() - start) / 1000).toFixed(1)),
+      prompt_version: "v1",
+      rules_applied,
+      attempts: attempt,
+      retried: attempt === 2
+    };
+    return result;
   }
-  const result = parseJson(outputText);
-  const rules_applied = applyRules(result);
-  const { errors, warnings } = validate(result, listingText);
-  if (errors.length) throw new Error(`Validation failed: ${errors[0]}`);
-  const input_tokens = (data.usage && (data.usage.input_tokens ?? data.usage.inputTokens)) || 0;
-  const output_tokens = (data.usage && (data.usage.output_tokens ?? data.usage.outputTokens)) || 0;
-  const usd = Math.round(((input_tokens / 1000000) * INPUT_USD_PER_MILLION + (output_tokens / 1000000) * OUTPUT_USD_PER_MILLION) * 1000000) / 1000000;
-  result.cost = { usd, input_tokens, output_tokens, model: MODEL };
-  result.harness = {
-    errors,
-    warnings,
-    seconds: parseFloat(((Date.now() - start) / 1000).toFixed(1)),
-    prompt_version: "v1",
-    rules_applied
-  };
-  return result;
 }
 
 async function fetchJson(url, opts = {}, timeoutMs = 7000) {

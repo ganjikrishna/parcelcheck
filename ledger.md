@@ -6,7 +6,7 @@ because the two records do not fully close: the Billing page already
 showed $0.10 spent at 20:26 ET on 2026-11-24, before the first
 ParcelCheck call at 20:39, so that $0.10 is not ours and is
 unattributed. At 07:34 ET on 2026-11-25 the meter read $0.11. Our
-logged runs itemize to about $0.38 at list rates; the dated entries
+logged runs itemize to about $0.56 at list rates; the dated entries
 below itemize them, including the Muse Ember code build and the demo
 video phase. The
 meter's movement is smaller than the itemization; caching and metering
@@ -25,7 +25,7 @@ Credit allocation: $10.00.
 | Live judge demo reserve (never spent on development) | 2.00 | 0.00 | 2.00 |
 | Final submission day | 1.00 | 0.00 | 1.00 |
 | Unallocated buffer | 1.00 | 0.00 | 1.00 |
-| **Total** | **10.00** | **0.38** | **9.62** |
+| **Total** | **10.00** | **0.56** | **9.44** |
 
 ## Rules
 
@@ -222,3 +222,28 @@ Combined with round 1: 147 of 180 exact, 23 of 30 problems caught,
 89 of 111 missing named, 35 of 39 clean called clean, $0.0626 for
 the twenty scored runs. Results in verification-round2-results.md.
 Itemized logged total is now about $0.38 of the $10.
+
+2026-11-25, about 14:05 to 15:00 ET: IMPROVEMENTS PASS, at Vinay's
+word, funded from the remaining credit with $2 held back as the live
+judging reserve. (1) Parse-failure hardening: failed-runs.log showed
+the two zero-score causes, a schema echo (L10) and an empty reply
+after the model spent the whole 12,000-token output cap on hidden
+reasoning (L15). Muse Ember rewrote checker.py's run path from a
+written spec (one logged call, $0.0103): cap raised to 24,000, one
+bounded retry on an empty, unparseable, or invalid reply, both
+attempts traced with costs summed. Five offline stub tests passed;
+L15 then completed on the first attempt ($0.0037). The same hardening
+was mirrored into the production Worker by Ember (one call, $0.0054),
+deployed, and passed a live battery (junk still 400, L15 full report,
+Austin records correct). (2) Re-verification of both sealed rounds
+under the hardened checker: 161 of 180 combined (round 1: 84 of 90,
+round 2: 77 of 90), $0.0588; no run needed the retry. Two surplus L22
+runs from an output-file collision cost $0.0129 and are counted here,
+not in the scored cost. (3) Verification round 3: ten fresh listings
+(L23 to L32), Ember-drafted sealed key ($0.0174, hash d1b99a93...),
+scored 85 of 90 with the retry firing on two runs, $0.0394; two
+surplus L32 runs from the same file collision cost $0.0102, counted
+here. (4) Records round 2: ten fresh addresses, sealed key
+(260e8e29...), scored 20 of 20 through the production Worker,
+$0.0172. (5) Live battery after the Worker deploy, about $0.007.
+Itemized logged total is now about $0.56 of the $10.
