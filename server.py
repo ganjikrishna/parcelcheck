@@ -8,10 +8,10 @@ Bind: 127.0.0.1:8931 (local only; public exposure is a separate deploy step).
 Caps: listing text max 20000 chars; 200 live runs per day, counted in
 server-cap.json next to this file.
 """
-import json, pathlib, time
+import json, os, pathlib, time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-PREP = pathlib.Path.home() / "parcelcheck-prep"
+PREP = pathlib.Path(os.environ.get("PARCELCHECK_DIR", pathlib.Path(__file__).resolve().parent))
 ALLOWED = {"/": "index.html", "/index.html": "index.html",
            "/cached-L01.json": "cached-L01.json", "/cached-L07.json": "cached-L07.json"}
 MAX_TEXT = 20000

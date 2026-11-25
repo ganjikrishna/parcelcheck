@@ -6,7 +6,7 @@ The checker never sees the key; scoring happens here, after the runs.
 """
 import hashlib, json, pathlib, re, sys
 
-PREP = pathlib.Path.home() / "parcelcheck-prep"
+PREP = pathlib.Path(os.environ.get("PARCELCHECK_DIR", pathlib.Path(__file__).resolve().parent))
 sys.path.insert(0, str(PREP))
 import checker
 

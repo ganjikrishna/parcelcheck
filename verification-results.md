@@ -2,8 +2,15 @@
 
 Answer key sha256 verified before the run: 688099684502282a3e8805e7caaabeb7ad3b1d611f01479ee3f7a8d78c70e507
 
-**Totals across 90 points: 78 exact matches. Problems in key: 11, caught: 9. False problem flags: 3. Missing in key: 65, named missing: 55. Clean in key: 14, called clean: 14. Total cost of the ten runs: $0.0236.**
+**Totals across 90 points: 78 exact matches. Problems in key: 11, caught: 9. False problem flags: 3. Missing in key: 65, named missing: 55. Clean in key: 14, called clean: 14. Total cost of the ten runs: $0.0258, including the L10 run that failed to parse ($0.0022).**
 Prompt: v1 (frozen). Model: muse-ember-1.0. One structured pass per listing.
+
+Two earlier passes over parts of the set (L02 to L06) aborted on output
+shape failures before this scored pass; their runs and costs are in
+runs.jsonl and the ledger, and nothing from them was reused. Inside the
+scored pass, no listing was retried. The seal claim for the answer key
+rests on the timestamps in ledger.md; the git history of this repo
+begins after these runs.
 
 ## L02: 9/9 points match, cost $0.0018
 

@@ -17,7 +17,10 @@ published.
   Census geocoder, FEMA NFHL, and USDA Soil Data Access from a separate
   code path, with the expectation rules fixed in writing before the run.
 - The scored run went through the production Worker, the same code path a
-  visitor uses. Two points scored per address (flood, perc/septic), 20 in
+  visitor uses. Records runs go through the Worker and are not
+  appended to runs.jsonl (which covers checker.py runs); their costs are
+  stated in this document. The key seal rests on the timestamps in
+  ledger.md; git history begins after the runs. Two points scored per address (flood, perc/septic), 20 in
   total. Two development addresses (a residential address in Georgia and
   a Miami Beach address used while building the mode) were excluded from
   the set.

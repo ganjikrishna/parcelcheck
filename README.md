@@ -38,7 +38,8 @@ The checker was tested against 12 real listings. Two (L01, L07) were development
 - 55 of 65 missing points correctly named as missing
 - 14 of 14 clean points correctly called clean
 - One listing (L10) produced output that did not parse and scored zero. It is reported, not hidden.
-- Total cost of the ten verification runs: $0.0236
+- Total cost of the ten verification runs: $0.0258, including the one run that failed to parse
+- Two earlier passes over parts of the set aborted on output shape failures before the scored pass; they are logged in runs.jsonl and the ledger, and nothing from them was reused. The key seal rests on the ledger timestamps; git history begins after the runs
 
 Records mode was verified the same way (`records-verification.md`, key in `records-answer-key.md`, sealed by hash): ten addresses, flood and septic scored, 20 points. First pass: **14 of 20** (flood 9 of 10, septic 5 of 10), $0.0175. The misses had two causes, both fixed in the harness and records assembly with the prompt unchanged: a USDA "Not rated" sentence that read as a septic problem (5 of the misses), and one FEMA gateway drop. A post-fix confirmation run on the five missed addresses scored 10 of 10.
 
@@ -56,13 +57,14 @@ python3 checker.py listings/L01.txt L01   # one check from the command line
 python3 verify.py     # re-run the verification set against the sealed key
 ```
 
-The API key is read from `meta-api-key.txt` in the working folder. It is listed in `.gitignore` and is never committed.
+The API key is read from `meta-api-key.txt` in the same folder as the scripts (override the folder with the `PARCELCHECK_DIR` environment variable). It is listed in `.gitignore` and is never committed.
 
 ## Files
 
 - `index.html` the one page app: examples with cached results, paste box, live run, cost counter
 - `worker.js` the production Cloudflare Worker: serves the page, runs the same checker, and adds the live public records check (Census, FEMA, USDA, USFWS). The frozen prompt is injected at deploy time from `prompt-v1.json`; the API key is a Worker secret
 - `server.py` local server with an explicit path allowlist (the answer key and the API key are never served) and a daily live run cap
+- `records-spike.py` the independent spike that built the records answer key: direct Census, FEMA, and USDA calls on a separate code path from the Worker
 - `checker.py` the checker core: one Ember pass, harness validation, quote check, cost fill, trace log
 - `prompt-v1.md`, `prompt-v1.json` the frozen prompt, schema included
 - `checklist.md` the nine point diligence list the prompt is built from

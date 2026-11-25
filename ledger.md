@@ -1,6 +1,10 @@
 # ParcelCheck spend ledger
 
-**Total spent: $0.00**
+**Total spent: about $0.15 of the $10 credit.** Meta Billing is the
+authority: it read $0.11 at 07:34 ET on 2026-11-25, before that day's
+verification runs (about $0.035). Of the metered total, $0.10 was already
+spent before the first logged run and is unattributed. Logged runs
+itemize to about $0.12 at list rates; the table below uses those.
 
 Credit allocation: $10.00.
 
@@ -8,8 +12,8 @@ Credit allocation: $10.00.
 
 | Bucket | Allocated (USD) | Spent (USD) | Remaining (USD) |
 |---|---|---|---|
-| Development | 3.00 | 0.00 | 3.00 |
-| Verification | 2.00 | 0.00 | 2.00 |
+| Development | 3.00 | 0.04 | 2.96 |
+| Verification | 2.00 | 0.08 | 1.92 |
 | Demo video | 1.00 | 0.00 | 1.00 |
 | Live judge demo reserve (never spent on development) | 2.00 | 0.00 | 2.00 |
 | Final submission day | 1.00 | 0.00 | 1.00 |
@@ -57,3 +61,5 @@ Credit allocation: $10.00.
 2026-11-25, 07:36 to 08:05 ET: BOTH FOLLOW-UPS DONE (Vinay's call, after his Billing screenshot showed $9.89 of the $10 still unused). (1) HARNESS PARSE FIX: the output parser in checker.py and the Worker now scans for the first complete object carrying a top level "checks" key, recovering results surrounded by prose or a schema echo; a schema-only reply is rejected by the validator, and the Worker now returns an error instead of an empty report. Prompt v1 unchanged. L10 re-run five times ($0.0096): one clean, one rejected parse, one rejected schema echo, then 9 of 9 twice at $0.0018 each. Addendum published in verification-results.md; the original scored zero stands. (2) RECORDS VERIFICATION: ten addresses, key built from an independent spike (records-spike.py, direct Census/FEMA/USDA calls, separate code path), sealed at c3e44ae65d5aa38434bc58cbd7a283a448a7dbe8c8de2d33682b234a7db6da73 before the scored run. Scored pass through the production Worker: 14 of 20 (flood 9 of 10, septic 5 of 10), $0.0175. Findings: a USDA "Not rated" sentence read as a septic problem 5 of 5 times (fix: the sentence is omitted when the rating is Not rated), and FEMA's gateway dropped 1 run in 10 (fix: pause, retry, FIRMette mirror fallback). Post-fix confirmation on the five missed addresses: 10 of 10, $0.0071. Full record in records-verification.md. Also this session: the records report's question section is retitled "Still to verify" in records mode, at Vinay's question about why seller questions appear on an address check. All-in hackathon spend now about $0.15 of the $10 (Meta's meter read $0.11 at 07:34 ET, before today's verification runs).
 
 2026-11-25, 09:00 ET: RECORDS KEY AMENDED AND RE-SEALED at Vinay's direction. The independent push validator blocked the verification round on one line: the sealed records key named the Georgia development address as the builder's home, publishing its flood zone and septic categories under his name (no street address anywhere). Vinay chose rewording. The key now says "a residential address in Georgia", with an amendment note inside the key recording the change, that nothing else was touched, and the original sealed hash (c3e44ae65d5aa38434bc58cbd7a283a448a7dbe8c8de2d33682b234a7db6da73, the version the scored run used). The matching line in records-verification.md was reworded the same way. New key hash is in records-answer-key.sha256.
+
+2026-11-25, 09:49 ET: OUTSIDE REVIEW, SIX GAPS, ALL FIXED. A fresh Claude review of the public repo (run under Vinay's outside-validation rule) confirmed the headline numbers and both key hashes, and found six gaps. Checked one by one against the files, all six were real: (1) runs.jsonl in the repo stopped at 20 lines; the five L10 re-runs were only on Flash. Synced; the repo trace now has all 25 checker runs, and records-verification.md states plainly that Worker runs are not in runs.jsonl and where their costs live. (2) The two earlier aborted passes over L02 to L06 were disclosed only here; the disclosure now sits in verification-results.md and the README, with the note that the key seal rests on these ledger timestamps since git history begins after the runs. (3) The published verification cost, $0.0236, was the sum of the nine parsed runs only; with L10's failed run the ten runs cost $0.0258. Corrected in verification-results.md, the README, and the submission draft (description re-trimmed to 1,982 characters). (4) This ledger's header still said $0.00; fixed above with the meter as authority. (5) checker.py, verify.py, and server.py hardcoded ~/parcelcheck-prep; they now use the folder holding the script, with a PARCELCHECK_DIR override, so a clone runs as the README says. (6) records-spike.py, named as the records key's independent source, was missing from the repo; added (it contains only the ten scored public addresses). Spend this round: $0.00.

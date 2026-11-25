@@ -6,14 +6,15 @@ Usage:
   python3 checker.py <listing-file> [listing-id]
   python3 checker.py --text '<listing text>' [listing-id]
 
-Reads the API key from ~/parcelcheck-prep/meta-api-key.txt and the frozen
-prompt from ~/parcelcheck-prep/prompt-v1.json. Appends one JSON line per
-run to ~/parcelcheck-prep/runs.jsonl (the prompt and token trace).
+Reads the API key from meta-api-key.txt and the frozen prompt from
+prompt-v1.json, both in the folder holding this script (override with
+the PARCELCHECK_DIR environment variable). Appends one JSON line per
+run to runs.jsonl in the same folder (the prompt and token trace).
 Prints the validated result JSON to stdout.
 """
-import json, pathlib, re, sys, time, urllib.request, urllib.error
+import json, os, pathlib, re, sys, time, urllib.request, urllib.error
 
-PREP = pathlib.Path.home() / "parcelcheck-prep"
+PREP = pathlib.Path(os.environ.get("PARCELCHECK_DIR", pathlib.Path(__file__).resolve().parent))
 API = "https://api.meta.ai/v1/responses"
 MODEL = "muse-ember-1.0"
 RATE_IN, RATE_OUT = 0.10 / 1e6, 0.50 / 1e6
