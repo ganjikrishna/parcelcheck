@@ -24,7 +24,7 @@ Land listings are written to sell. The expensive facts, a parcel that is landloc
 
 ## How it works
 
-One structured call to Muse Ember (Meta Model API) per listing, using the frozen prompt in `prompt-v1.md`. A small harness around the call validates the output before anything is shown: exactly nine points, every problem or clean claim backed by a quote that must appear word for word in the listing text, red flags and missing items consistent with the per point statuses, and a seller question for every missing point. The harness fills in the real cost of the run from the API token counts. Every run is logged in `runs.jsonl` with its prompt version and token counts.
+One structured call to Muse Ember (Meta Model API) per listing, using the frozen prompt in `prompt-v1.md`. A small harness around the call validates the output before anything is shown: exactly nine points, every problem or clean claim backed by a quote that must appear word for word in the listing text, red flags and missing items consistent with the per point statuses, and a seller question for every missing point. The harness fills in the real cost of the run from the API token counts. One checklist rule is enforced by the harness itself, openly and recorded in the run: liens and tax status counts as clean only when the quoted evidence covers both halves, taxes and liens; one half alone is downgraded to not addressed. Every run is logged in `runs.jsonl` with its prompt version and token counts.
 
 Listings go stale, so the live page (a Cloudflare Worker, source in `worker.js`) also checks public records. One box, nothing to configure: type just an address and the check runs on records alone; paste a listing that contains an address and the records are checked too and merged into the same report. The sources are all free and need no keys: the US Census geocoder finds the point, FEMA's National Flood Hazard Layer gives the flood zone, the USDA soil survey gives the soil, its drainage class, and its septic absorption rating, and the US Fish and Wildlife Service wetlands inventory reports mapped wetlands. The records are compiled into sourced sentences and go through the same Ember pass and the same quote-or-drop validation, so a record can fill a listing's silence but can never be invented. A source that fails adds nothing, and that point stays a seller question.
 
@@ -39,7 +39,7 @@ The checker was tested against 12 real listings. Two (L01, L07) were development
 - 14 of 14 clean points correctly called clean
 - One listing (L10) produced output that did not parse and scored zero. It is reported, not hidden.
 - Total cost of the ten verification runs: $0.0258, including the one run that failed to parse
-- Two earlier passes over parts of the set aborted on output shape failures before the scored pass; they are logged in runs.jsonl and the ledger, and nothing from them was reused. The key seal rests on the ledger timestamps; git history begins after the runs
+- Two earlier passes over parts of the set stopped before the scored pass and nothing from them was reused: the second stopped at L06 on an output shape error the trace records; the first stopped after L02 and L03, both logged clean, and the trace does not record why. Both are in runs.jsonl and the ledger. The key seal rests on the ledger timestamps; git history begins after the runs
 
 Records mode was verified the same way (`records-verification.md`, key in `records-answer-key.md`, sealed by hash): ten addresses, flood and septic scored, 20 points. First pass: **14 of 20** (flood 9 of 10, septic 5 of 10), $0.0175. The misses had two causes, both fixed in the harness and records assembly with the prompt unchanged: a USDA "Not rated" sentence that read as a septic problem (5 of the misses), and one FEMA gateway drop. A post-fix confirmation run on the five missed addresses scored 10 of 10.
 
@@ -72,7 +72,7 @@ The API key is read from `meta-api-key.txt` in the same folder as the scripts (o
 - `answer-key.md`, `answer-key.sha256` the sealed scoring key
 - `verification-results.md`, `verification-detail.json` the scored results, with the L10 addendum
 - `records-answer-key.md`, `records-answer-key.sha256`, `records-verification.md` the sealed key and scored results for records mode
-- `cached-L01.json`, `cached-L07.json` recorded live results used as page examples
+- `cached-L01.json`, `cached-L07.json`, `cached-MB.json` recorded live results used as page examples (the Miami Beach one is an address-only records check)
 - `runs.jsonl` the prompt and token trace for every run
 - `ledger.md` the spend ledger
 

@@ -9,9 +9,11 @@
     },
     {
       "point": "flood",
-      "status": "missing",
-      "evidence": [],
-      "note": "The listing does not state a flood zone."
+      "status": "clean",
+      "evidence": [
+        "FEMA National Flood Hazard Layer: the flood zone at this point is Zone X, area of minimal flood hazard. This point is not in a Special Flood Hazard Area."
+      ],
+      "note": "The listing states the flood zone is Zone X and not in a Special Flood Hazard Area."
     },
     {
       "point": "perc_septic",
@@ -20,7 +22,7 @@
         "Sewer: Perc Test On File.",
         "Approved perc test for septic system."
       ],
-      "note": "The listing states the perc test is on file and approved for a septic system."
+      "note": "The listing states an approved perc test for septic system."
     },
     {
       "point": "water_well",
@@ -29,19 +31,19 @@
         "Water: Private, Well.",
         "Existing drilled well."
       ],
-      "note": "The listing states a drilled well but does not state its depth."
+      "note": "The listing states a private well and a drilled well, but does not state its depth."
     },
     {
       "point": "liens_tax",
       "status": "missing",
       "evidence": [],
-      "note": "The listing states a tax amount but does not state lien or tax status."
+      "note": "The listing gives a tax amount but does not state lien or tax status."
     },
     {
       "point": "zoning",
       "status": "missing",
       "evidence": [],
-      "note": "The listing does not state the zoning designation."
+      "note": "The listing does not state a zoning code or permitted uses."
     },
     {
       "point": "utilities",
@@ -55,19 +57,18 @@
       "point": "mineral_timber",
       "status": "missing",
       "evidence": [],
-      "note": "The listing does not state mineral or timber rights."
+      "note": "The listing describes wooded land but does not state mineral or timber rights."
     },
     {
       "point": "survey",
       "status": "missing",
       "evidence": [],
-      "note": "The listing does not state survey status."
+      "note": "The listing gives lot size but does not state survey status."
     }
   ],
   "red_flags": [],
   "missing_items": [
     "access",
-    "flood",
     "liens_tax",
     "zoning",
     "mineral_timber",
@@ -76,43 +77,48 @@
   "seller_questions": [
     {
       "point": "access",
-      "question": "Does this parcel have legal road access?"
-    },
-    {
-      "point": "flood",
-      "question": "What is the flood zone designation for this parcel?"
+      "question": "Does the parcel have legal road access?"
     },
     {
       "point": "water_well",
-      "question": "What is the depth of the drilled well on this parcel?"
+      "question": "What is the depth of the drilled well?"
     },
     {
       "point": "liens_tax",
-      "question": "Are there any liens on this parcel and what is the current tax status?"
+      "question": "Are there any liens against the parcel, and is the tax status current?"
     },
     {
       "point": "zoning",
-      "question": "What is the zoning designation for this parcel?"
+      "question": "What is the zoning of the parcel, and what uses are permitted?"
     },
     {
       "point": "mineral_timber",
-      "question": "Are mineral and timber rights included with this parcel?"
+      "question": "Do mineral and timber rights convey to the buyer?"
     },
     {
       "point": "survey",
-      "question": "Has a survey been completed for this parcel?"
+      "question": "Has a survey been completed for the parcel, and can a copy be provided?"
     }
   ],
   "cost": {
-    "usd": 0.002363,
-    "input_tokens": 1595,
-    "output_tokens": 4406,
+    "usd": 0.003682,
+    "input_tokens": 1751,
+    "output_tokens": 7013,
     "model": "muse-ember-1.0"
   },
   "harness": {
     "errors": [],
     "warnings": [],
-    "seconds": 8.1,
-    "prompt_version": "v1"
-  }
+    "seconds": 15.5,
+    "prompt_version": "v1",
+    "rules_applied": []
+  },
+  "mode": "listing+records",
+  "matched_address": "55 DORA BUSH HILL RD, CARLTON, GA, 30627",
+  "sources": [
+    "US Census Bureau geocoder",
+    "FEMA National Flood Hazard Layer",
+    "US Fish and Wildlife Service wetlands inventory",
+    "USDA soil survey"
+  ]
 }

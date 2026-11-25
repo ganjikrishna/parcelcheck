@@ -1,10 +1,16 @@
 # ParcelCheck spend ledger
 
-**Total spent: about $0.15 of the $10 credit.** Meta Billing is the
-authority: it read $0.11 at 07:34 ET on 2026-11-25, before that day's
-verification runs (about $0.035). Of the metered total, $0.10 was already
-spent before the first logged run and is unattributed. Logged runs
-itemize to about $0.12 at list rates; the table below uses those.
+**Total spent: about $0.17 of the $10 credit.** Meta Billing is the
+authority for the credit. The reconciliation, stated plainly because the
+two records do not fully close: the Billing page already showed $0.10
+spent at 20:26 ET on 2026-11-24, before the first ParcelCheck call at
+20:39, so that $0.10 is not ours and is unattributed. At 07:34 ET on
+2026-11-25 the meter read $0.11. Our logged runs between those reads
+itemize to about $0.09 at list rates, which does not match the meter's
+$0.01 movement; caching and metering sit on Meta's side and cannot be
+reconciled from here. Since 07:34, logged runs add about $0.06. The
+meter governs the credit; this log governs what ran. Logged runs
+itemize to about $0.14 at list rates; the table below uses those.
 
 Credit allocation: $10.00.
 
@@ -12,13 +18,13 @@ Credit allocation: $10.00.
 
 | Bucket | Allocated (USD) | Spent (USD) | Remaining (USD) |
 |---|---|---|---|
-| Development | 3.00 | 0.04 | 2.96 |
-| Verification | 2.00 | 0.08 | 1.92 |
+| Development | 3.00 | 0.05 | 2.95 |
+| Verification | 2.00 | 0.09 | 1.91 |
 | Demo video | 1.00 | 0.00 | 1.00 |
 | Live judge demo reserve (never spent on development) | 2.00 | 0.00 | 2.00 |
 | Final submission day | 1.00 | 0.00 | 1.00 |
 | Unallocated buffer | 1.00 | 0.00 | 1.00 |
-| **Total** | **10.00** | **0.12** | **9.88** |
+| **Total** | **10.00** | **0.14** | **9.86** |
 
 ## Rules
 
@@ -28,9 +34,10 @@ Credit allocation: $10.00.
 
 ## Run log
 
-| Date | Bucket | Listing | Prompt version | Model | Input tokens | Output tokens | Cost (USD) | Running total (USD) |
-|---|---|---|---|---|---|---|---|---|
-| 2026-11-24 | (none) | (none) | v0.1-draft | (none) | 0 | 0 | 0.00 | 0.00 |
+Per-call trace for every checker run: `runs.jsonl` (prompt version,
+input and output tokens, cost, errors). Calls that do not go through
+checker.py (smoke tests, shape tests, page and Worker runs, records
+runs) are itemized in the dated entries below.
 
 2026-11-24: day-one prep. No API calls, no model calls, no spend.
 
@@ -63,3 +70,5 @@ Credit allocation: $10.00.
 2026-11-25, 09:00 ET: RECORDS KEY AMENDED AND RE-SEALED at Vinay's direction. The independent push validator blocked the verification round on one line: the sealed records key named the Georgia development address as the builder's home, publishing its flood zone and septic categories under his name (no street address anywhere). Vinay chose rewording. The key now says "a residential address in Georgia", with an amendment note inside the key recording the change, that nothing else was touched, and the original sealed hash (c3e44ae65d5aa38434bc58cbd7a283a448a7dbe8c8de2d33682b234a7db6da73, the version the scored run used). The matching line in records-verification.md was reworded the same way. New key hash is in records-answer-key.sha256.
 
 2026-11-25, 09:49 ET: OUTSIDE REVIEW, SIX GAPS, ALL FIXED. A fresh Claude review of the public repo (run under Vinay's outside-validation rule) confirmed the headline numbers and both key hashes, and found six gaps. Checked one by one against the files, all six were real: (1) runs.jsonl in the repo stopped at 20 lines; the five L10 re-runs were only on Flash. Synced; the repo trace now has all 25 checker runs, and records-verification.md states plainly that Worker runs are not in runs.jsonl and where their costs live. (2) The two earlier aborted passes over L02 to L06 were disclosed only here; the disclosure now sits in verification-results.md and the README, with the note that the key seal rests on these ledger timestamps since git history begins after the runs. (3) The published verification cost, $0.0236, was the sum of the nine parsed runs only; with L10's failed run the ten runs cost $0.0258. Corrected in verification-results.md, the README, and the submission draft (description re-trimmed to 1,982 characters). (4) This ledger's header still said $0.00; fixed above with the meter as authority. (5) checker.py, verify.py, and server.py hardcoded ~/parcelcheck-prep; they now use the folder holding the script, with a PARCELCHECK_DIR override, so a clone runs as the README says. (6) records-spike.py, named as the records key's independent source, was missing from the repo; added (it contains only the ten scored public addresses). Spend this round: $0.00.
+
+2026-11-25, 10:02 to 10:20 ET: OUTSIDE REVIEW ROUND 2, SEVEN FIXES. The fresh Claude re-checked round 1's six fixes (all confirmed in the files, and it re-summed the scored pass itself: $0.025807) and then tested the live site. Findings and what was done: (1) verify.py CRASHED on startup: the round 1 path fix's import edit silently missed verify.py's import line, so os was never imported; a syntax compile could not catch it, running it could. Fixed, and this time proven by running it on a keyless copy, where it verifies the key hash and stops at the first missing file instead of NameError. (2) Ledger reconciliation: the header implied logged runs of about $0.01 by 07:34, but they itemize to about $0.09; the header now states the facts and the open gap plainly (see top of this file), and the stub run-log table is replaced by a pointer to runs.jsonl. (3) The first aborted pass: the trace records no error for it, so the docs no longer claim a shape failure for it; verification-results.md and the README now say the second pass stopped on the recorded L06 shape error and the first stopped after two clean runs for a reason the trace does not record. (4) A taxes-only statement was scored clean on liens/tax, against checklist section 5, which requires both halves. The harness now enforces that rule in checker.py and the Worker, openly: a one-half clean is downgraded to not addressed, the standard question is added, and the rule is recorded in the run's harness block. Proven offline on three fabricated cases and live on the reviewer's pattern. The scored verification predates the rule and stands as measured. (5) Junk input ("asdf qwerty 123") was charged $0.0008 and produced a report; inputs under eight words now return a clear 400 and cost nothing, and the empty-input message is fixed. (6) A non-US address silently fell back to listing mode; the report now carries a plain note when an address was not found in US records or records could not be checked. (7) Both cached examples predated records mode, and the Georgia one showed a well-depth question under a clean water point. All three examples were re-recorded through the production Worker (a Miami Beach address-only example added), questions on stated points now render under their own follow-up heading, and the recorded date reads Nov 25. One FEMA drop hit the first Georgia refresh (sources list showed three of four, flood honestly missing); a second run answered with all four sources and flood clean, and that run is the cache. The reviewer's own live tests cost about $0.0064 on our credits, logged here as reported. Round spend: about $0.023. All-in: about $0.17 of the $10.

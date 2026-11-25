@@ -66,6 +66,31 @@ def parse_json(text):
                 return obj
         raise
 
+def apply_rules(result):
+    """Deterministic checklist rules, applied openly and recorded in the
+    result. liens_tax counts as clean only when the evidence covers both
+    halves of the point (taxes current or paid, and no liens), per
+    checklist.md section 5. A clean call resting on one half is downgraded
+    to missing, and the standard seller question is added if the model
+    did not ask it. Nothing else is edited."""
+    applied = []
+    for c in result.get("checks", []):
+        if c.get("point") == "liens_tax" and c.get("status") == "clean":
+            ev = " ".join(c.get("evidence", [])).lower()
+            if ("tax" in ev) != ("lien" in ev):
+                c["status"] = "missing"
+                c["note"] = (c.get("note", "") +
+                    " Harness rule: only one half of this point (taxes or liens) is stated, so it counts as not fully addressed.").strip()
+                if "liens_tax" not in result.get("missing_items", []):
+                    result.setdefault("missing_items", []).append("liens_tax")
+                if not any(q.get("point") == "liens_tax" for q in result.get("seller_questions", [])):
+                    result.setdefault("seller_questions", []).append(
+                        {"point": "liens_tax",
+                         "question": "Are all property taxes paid through the current year, and are there any liens, judgments, or back taxes on this parcel?"})
+                applied.append("liens_tax_clean_requires_both_halves")
+    return applied
+
+
 def validate(result, listing_text):
     """Harness checks. Returns (errors, warnings). Never edits statuses;
     a failed quote check is reported, not silently fixed."""
@@ -122,15 +147,16 @@ def check(listing_text, listing_id):
         with open(PREP / "failed-runs.log", "a") as f:
             f.write(json.dumps(fail) + "\n" + raw + "\n---\n")
         raise
+    applied = apply_rules(result)
     errors, warnings = validate(result, listing_text)
     usd = round(i * RATE_IN + o * RATE_OUT, 6)
     result["cost"] = {"usd": usd, "input_tokens": i, "output_tokens": o, "model": MODEL}
     result["harness"] = {"errors": errors, "warnings": warnings, "seconds": dt,
-                         "prompt_version": prompt["version"]}
+                         "prompt_version": prompt["version"], "rules_applied": applied}
     trace = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "listing_id": listing_id,
              "prompt_version": prompt["version"], "model": MODEL,
              "input_tokens": i, "output_tokens": o, "usd": usd,
-             "errors": errors, "warnings": warnings}
+             "errors": errors, "warnings": warnings, "rules_applied": applied}
     with open(PREP / "runs.jsonl", "a") as f:
         f.write(json.dumps(trace) + "\n")
     return result

@@ -6,15 +6,16 @@
       "status": "problem_stated",
       "evidence": [
         "Property is landlocked with no established road access",
-        "Road Frontage: None."
+        "Road Frontage: None.",
+        "Roads: None."
       ],
-      "note": "Listing states the property is landlocked with no established road access."
+      "note": "Listing states the parcel is landlocked with no established road access."
     },
     {
       "point": "flood",
       "status": "missing",
       "evidence": [],
-      "note": "Listing does not state flood zone information."
+      "note": "Listing does not state flood zone or floodplain status."
     },
     {
       "point": "perc_septic",
@@ -26,13 +27,13 @@
       "point": "water_well",
       "status": "missing",
       "evidence": [],
-      "note": "Listing does not state a well or well depth."
+      "note": "Listing does not state a well, well depth, or public water availability."
     },
     {
       "point": "liens_tax",
       "status": "missing",
       "evidence": [],
-      "note": "Listing does not state lien status or tax status beyond an amount."
+      "note": "Listing does not state lien status or whether taxes are current."
     },
     {
       "point": "zoning",
@@ -40,7 +41,7 @@
       "evidence": [
         "Zoned AU agricultural."
       ],
-      "note": "Listing states the parcel is zoned AU agricultural."
+      "note": "Listing states zoning as AU agricultural."
     },
     {
       "point": "utilities",
@@ -61,18 +62,18 @@
       "point": "survey",
       "status": "missing",
       "evidence": [],
-      "note": "Listing does not state survey status."
+      "note": "Listing does not state a survey status."
     }
   ],
   "red_flags": [
     {
       "point": "access",
-      "summary": "Property is landlocked with no established road access.",
+      "summary": "Parcel is landlocked with no established road access.",
       "quote": "Property is landlocked with no established road access"
     },
     {
       "point": "utilities",
-      "summary": "Listing states no utilities are represented as available.",
+      "summary": "No utilities are represented as available.",
       "quote": "no utilities are represented as available"
     }
   ],
@@ -87,11 +88,11 @@
   "seller_questions": [
     {
       "point": "flood",
-      "question": "What is the flood zone designation for this parcel?"
+      "question": "What is the flood zone for this parcel, and is any part of it in a floodplain or special flood hazard area?"
     },
     {
       "point": "perc_septic",
-      "question": "Has a perc test been performed, and what were the results for septic feasibility?"
+      "question": "Has a perc test been performed, and are a septic system and its installation feasible or approved for this parcel?"
     },
     {
       "point": "water_well",
@@ -99,27 +100,30 @@
     },
     {
       "point": "liens_tax",
-      "question": "Are there any liens on this parcel, and are property taxes current?"
+      "question": "Are there any liens against this parcel, and are property taxes current with no taxes owed?"
     },
     {
       "point": "mineral_timber",
-      "question": "Are mineral and timber rights included with the sale of this parcel?"
+      "question": "Are mineral and timber rights included with the sale, or have they been reserved or severed?"
     },
     {
       "point": "survey",
-      "question": "Has a survey been performed for this parcel, and is a survey available?"
+      "question": "Has a survey been completed for this parcel, and is a survey available?"
     }
   ],
   "cost": {
-    "usd": 0.002219,
+    "usd": 0.003596,
     "input_tokens": 1635,
-    "output_tokens": 4111,
+    "output_tokens": 6865,
     "model": "muse-ember-1.0"
   },
   "harness": {
     "errors": [],
     "warnings": [],
-    "seconds": 7.0,
-    "prompt_version": "v1"
-  }
+    "seconds": 14.7,
+    "prompt_version": "v1",
+    "rules_applied": []
+  },
+  "mode": "listing",
+  "records_note": "An address was found in the text, but live public records could not be checked for it this time. This report covers the listing text only."
 }

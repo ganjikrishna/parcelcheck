@@ -78,6 +78,31 @@ function validate(result, listingText) {
   return { errors, warnings };
 }
 
+function applyRules(result) {
+  // Checklist rule, applied openly and recorded: liens_tax is clean only
+  // when the evidence covers both halves (taxes current or paid, and no
+  // liens), per checklist.md section 5. One half alone downgrades to
+  // missing, with the standard seller question added if absent.
+  const applied = [];
+  for (const c of result.checks || []) {
+    if (c.point === "liens_tax" && c.status === "clean") {
+      const ev = (c.evidence || []).join(" ").toLowerCase();
+      if (ev.includes("tax") !== ev.includes("lien")) {
+        c.status = "missing";
+        c.note = ((c.note || "") + " Harness rule: only one half of this point (taxes or liens) is stated, so it counts as not fully addressed.").trim();
+        if (!(result.missing_items || []).includes("liens_tax"))
+          (result.missing_items = result.missing_items || []).push("liens_tax");
+        if (!(result.seller_questions || []).some(q => q.point === "liens_tax"))
+          (result.seller_questions = result.seller_questions || []).push({
+            point: "liens_tax",
+            question: "Are all property taxes paid through the current year, and are there any liens, judgments, or back taxes on this parcel?" });
+        applied.push("liens_tax_clean_requires_both_halves");
+      }
+    }
+  }
+  return applied;
+}
+
 async function runCheck(env, listingText, listingId) {
   const user = "Check this listing against the nine points. Return only the JSON object.\n\n" +
     `<listing id="${listingId}">\n${listingText}\n</listing>`;
@@ -99,11 +124,12 @@ async function runCheck(env, listingText, listingId) {
   const u = body.usage || {};
   const i = u.input_tokens || 0, o = u.output_tokens || 0;
   const result = parseJson(text);
+  const applied = applyRules(result);
   const { errors, warnings } = validate(result, listingText);
   if (errors.length) throw new Error("Validation failed: " + errors[0]);
   result.cost = { usd: Math.round((i * RATE_IN + o * RATE_OUT) * 1e6) / 1e6,
     input_tokens: i, output_tokens: o, model: MODEL };
-  result.harness = { errors, warnings, seconds: Math.round((Date.now() - t0) / 100) / 10, prompt_version: "v1" };
+  result.harness = { errors, warnings, seconds: Math.round((Date.now() - t0) / 100) / 10, prompt_version: "v1", rules_applied: applied };
   return result;
 }
 
@@ -268,6 +294,11 @@ async function runSmart(env, text, id) {
   // Plain listing text.
   const result = await runCheck(env, text, id);
   result.mode = "listing";
+  if (looksLikeAddress(text)) {
+    result.records_note = "That looked like an address, but it was not found in the US public records ParcelCheck uses, so records were not checked. It was read as listing text instead. ParcelCheck covers US addresses.";
+  } else if (addr) {
+    result.records_note = "An address was found in the text, but live public records could not be checked for it this time. This report covers the listing text only.";
+  }
   return result;
 }
 
@@ -292,7 +323,9 @@ export default {
       let body;
       try { body = await request.json(); } catch { return json(400, { error: "Bad request." }); }
       const text = (body.text || "").trim();
-      if (!text || text.length > MAX_TEXT) return json(400, { error: "Listing text missing or over 20000 characters." });
+      if (!text) return json(400, { error: "Nothing to check yet. Paste a listing, or type a street address with city and state." });
+      if (text.length > MAX_TEXT) return json(400, { error: "That text is over 20000 characters. Paste the listing description and its fields, not the whole page." });
+      if (text.trim().split(/\s+/).length < 8) return json(400, { error: "That is too short to check. Paste a full listing, or type a street address with city, state, and ZIP." });
       const id = env.RUN_COUNTER.idFromName("global");
       const stub = env.RUN_COUNTER.get(id);
       const cap = await (await stub.fetch("https://counter/")).json();

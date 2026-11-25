@@ -4,7 +4,7 @@ runs the frozen checker (prompt v1) over the ten untouched listings,
 scores against the key, and writes verification-results.md.
 The checker never sees the key; scoring happens here, after the runs.
 """
-import hashlib, json, pathlib, re, sys
+import hashlib, json, os, pathlib, re, sys
 
 PREP = pathlib.Path(os.environ.get("PARCELCHECK_DIR", pathlib.Path(__file__).resolve().parent))
 sys.path.insert(0, str(PREP))

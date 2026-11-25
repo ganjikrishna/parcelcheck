@@ -1,0 +1,134 @@
+{
+  "listing_id": "address",
+  "checks": [
+    {
+      "point": "access",
+      "status": "missing",
+      "evidence": [],
+      "note": "The listing does not state anything about legal road access."
+    },
+    {
+      "point": "flood",
+      "status": "problem_stated",
+      "evidence": [
+        "the flood zone at this point is Zone AE",
+        "This point is in a Special Flood Hazard Area, with a 1 percent or greater annual chance of flooding.",
+        "Flood insurance is required for buildings with federally backed mortgages in this area."
+      ],
+      "note": "The listing states the point is in Zone AE in a Special Flood Hazard Area with flood insurance required."
+    },
+    {
+      "point": "perc_septic",
+      "status": "missing",
+      "evidence": [],
+      "note": "The listing does not state anything about a perc test, septic feasibility, or public sewer availability."
+    },
+    {
+      "point": "water_well",
+      "status": "missing",
+      "evidence": [],
+      "note": "The listing does not state anything about a water source or well depth."
+    },
+    {
+      "point": "liens_tax",
+      "status": "missing",
+      "evidence": [],
+      "note": "The listing does not state anything about liens or tax status."
+    },
+    {
+      "point": "zoning",
+      "status": "missing",
+      "evidence": [],
+      "note": "The listing does not state anything about zoning."
+    },
+    {
+      "point": "utilities",
+      "status": "missing",
+      "evidence": [],
+      "note": "The listing does not state anything about utilities availability."
+    },
+    {
+      "point": "mineral_timber",
+      "status": "missing",
+      "evidence": [],
+      "note": "The listing does not state anything about mineral or timber rights."
+    },
+    {
+      "point": "survey",
+      "status": "missing",
+      "evidence": [],
+      "note": "The listing does not state anything about a land survey for the property."
+    }
+  ],
+  "red_flags": [
+    {
+      "point": "flood",
+      "summary": "The point is in Zone AE in a Special Flood Hazard Area with flood insurance required.",
+      "quote": "This point is in a Special Flood Hazard Area, with a 1 percent or greater annual chance of flooding."
+    }
+  ],
+  "missing_items": [
+    "access",
+    "perc_septic",
+    "water_well",
+    "liens_tax",
+    "zoning",
+    "utilities",
+    "mineral_timber",
+    "survey"
+  ],
+  "seller_questions": [
+    {
+      "point": "access",
+      "question": "Does this property have legal road access, and what is the access point or easement?"
+    },
+    {
+      "point": "perc_septic",
+      "question": "Has a perc test been performed, what were the results, and is public sewer available?"
+    },
+    {
+      "point": "water_well",
+      "question": "What is the water source for this property, and if there is a well, what is its depth?"
+    },
+    {
+      "point": "liens_tax",
+      "question": "Are there any liens on the property, and are taxes current?"
+    },
+    {
+      "point": "zoning",
+      "question": "What is the zoning designation for this property?"
+    },
+    {
+      "point": "utilities",
+      "question": "Which utilities are available at the property, including electricity, gas, phone, internet, and cable?"
+    },
+    {
+      "point": "mineral_timber",
+      "question": "Are mineral and timber rights included with the sale of this property?"
+    },
+    {
+      "point": "survey",
+      "question": "Has a land survey been performed for this property, and can a copy be provided?"
+    }
+  ],
+  "cost": {
+    "usd": 0.001774,
+    "input_tokens": 1504,
+    "output_tokens": 3248,
+    "model": "muse-ember-1.0"
+  },
+  "harness": {
+    "errors": [],
+    "warnings": [],
+    "seconds": 6.6,
+    "prompt_version": "v1"
+  },
+  "mode": "records",
+  "matched_address": "1700 CONVENTION CENTER DR, MIAMI BEACH, FL, 33139",
+  "sources": [
+    "US Census Bureau geocoder",
+    "FEMA National Flood Hazard Layer",
+    "US Fish and Wildlife Service wetlands inventory",
+    "USDA soil survey"
+  ]
+}
