@@ -1,0 +1,118 @@
+{
+  "listing_id": "L07",
+  "checks": [
+    {
+      "point": "access",
+      "status": "missing",
+      "evidence": [],
+      "note": "The listing gives a street address but does not state legal road access."
+    },
+    {
+      "point": "flood",
+      "status": "missing",
+      "evidence": [],
+      "note": "The listing does not state a flood zone."
+    },
+    {
+      "point": "perc_septic",
+      "status": "clean",
+      "evidence": [
+        "Sewer: Perc Test On File.",
+        "Approved perc test for septic system."
+      ],
+      "note": "The listing states the perc test is on file and approved for a septic system."
+    },
+    {
+      "point": "water_well",
+      "status": "clean",
+      "evidence": [
+        "Water: Private, Well.",
+        "Existing drilled well."
+      ],
+      "note": "The listing states a drilled well but does not state its depth."
+    },
+    {
+      "point": "liens_tax",
+      "status": "missing",
+      "evidence": [],
+      "note": "The listing states a tax amount but does not state lien or tax status."
+    },
+    {
+      "point": "zoning",
+      "status": "missing",
+      "evidence": [],
+      "note": "The listing does not state the zoning designation."
+    },
+    {
+      "point": "utilities",
+      "status": "clean",
+      "evidence": [
+        "Utilities: Cable Available, Electricity Available."
+      ],
+      "note": "The listing states cable and electricity are available."
+    },
+    {
+      "point": "mineral_timber",
+      "status": "missing",
+      "evidence": [],
+      "note": "The listing does not state mineral or timber rights."
+    },
+    {
+      "point": "survey",
+      "status": "missing",
+      "evidence": [],
+      "note": "The listing does not state survey status."
+    }
+  ],
+  "red_flags": [],
+  "missing_items": [
+    "access",
+    "flood",
+    "liens_tax",
+    "zoning",
+    "mineral_timber",
+    "survey"
+  ],
+  "seller_questions": [
+    {
+      "point": "access",
+      "question": "Does this parcel have legal road access?"
+    },
+    {
+      "point": "flood",
+      "question": "What is the flood zone designation for this parcel?"
+    },
+    {
+      "point": "water_well",
+      "question": "What is the depth of the drilled well on this parcel?"
+    },
+    {
+      "point": "liens_tax",
+      "question": "Are there any liens on this parcel and what is the current tax status?"
+    },
+    {
+      "point": "zoning",
+      "question": "What is the zoning designation for this parcel?"
+    },
+    {
+      "point": "mineral_timber",
+      "question": "Are mineral and timber rights included with this parcel?"
+    },
+    {
+      "point": "survey",
+      "question": "Has a survey been completed for this parcel?"
+    }
+  ],
+  "cost": {
+    "usd": 0.002363,
+    "input_tokens": 1595,
+    "output_tokens": 4406,
+    "model": "muse-ember-1.0"
+  },
+  "harness": {
+    "errors": [],
+    "warnings": [],
+    "seconds": 8.1,
+    "prompt_version": "v1"
+  }
+}

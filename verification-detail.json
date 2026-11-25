@@ -1,0 +1,230 @@
+{
+  "L02": {
+    "got": {
+      "access": "problem_stated",
+      "flood": "missing",
+      "perc_septic": "missing",
+      "water_well": "missing",
+      "liens_tax": "missing",
+      "zoning": "missing",
+      "utilities": "missing",
+      "mineral_timber": "missing",
+      "survey": "missing"
+    },
+    "cost": {
+      "usd": 0.001813,
+      "input_tokens": 1491,
+      "output_tokens": 3328,
+      "model": "muse-ember-1.0"
+    },
+    "harness": {
+      "errors": [],
+      "warnings": [],
+      "seconds": 5.3,
+      "prompt_version": "v1"
+    }
+  },
+  "L03": {
+    "got": {
+      "access": "problem_stated",
+      "flood": "missing",
+      "perc_septic": "problem_stated",
+      "water_well": "missing",
+      "liens_tax": "missing",
+      "zoning": "clean",
+      "utilities": "problem_stated",
+      "mineral_timber": "missing",
+      "survey": "missing"
+    },
+    "cost": {
+      "usd": 0.003947,
+      "input_tokens": 1587,
+      "output_tokens": 7576,
+      "model": "muse-ember-1.0"
+    },
+    "harness": {
+      "errors": [],
+      "warnings": [],
+      "seconds": 14.9,
+      "prompt_version": "v1"
+    }
+  },
+  "L04": {
+    "got": {
+      "access": "clean",
+      "flood": "problem_stated",
+      "perc_septic": "clean",
+      "water_well": "clean",
+      "liens_tax": "missing",
+      "zoning": "clean",
+      "utilities": "problem_stated",
+      "mineral_timber": "missing",
+      "survey": "missing"
+    },
+    "cost": {
+      "usd": 0.003572,
+      "input_tokens": 1541,
+      "output_tokens": 6835,
+      "model": "muse-ember-1.0"
+    },
+    "harness": {
+      "errors": [],
+      "warnings": [],
+      "seconds": 14.4,
+      "prompt_version": "v1"
+    }
+  },
+  "L05": {
+    "got": {
+      "access": "clean",
+      "flood": "problem_stated",
+      "perc_septic": "problem_stated",
+      "water_well": "problem_stated",
+      "liens_tax": "missing",
+      "zoning": "clean",
+      "utilities": "missing",
+      "mineral_timber": "missing",
+      "survey": "missing"
+    },
+    "cost": {
+      "usd": 0.004219,
+      "input_tokens": 1698,
+      "output_tokens": 8099,
+      "model": "muse-ember-1.0"
+    },
+    "harness": {
+      "errors": [],
+      "warnings": [],
+      "seconds": 14.0,
+      "prompt_version": "v1"
+    }
+  },
+  "L06": {
+    "got": {
+      "access": "missing",
+      "flood": "problem_stated",
+      "perc_septic": "missing",
+      "water_well": "missing",
+      "liens_tax": "missing",
+      "zoning": "clean",
+      "utilities": "missing",
+      "mineral_timber": "missing",
+      "survey": "missing"
+    },
+    "cost": {
+      "usd": 0.002145,
+      "input_tokens": 1545,
+      "output_tokens": 3981,
+      "model": "muse-ember-1.0"
+    },
+    "harness": {
+      "errors": [],
+      "warnings": [],
+      "seconds": 6.5,
+      "prompt_version": "v1"
+    }
+  },
+  "L08": {
+    "got": {
+      "access": "missing",
+      "flood": "missing",
+      "perc_septic": "clean",
+      "water_well": "clean",
+      "liens_tax": "missing",
+      "zoning": "missing",
+      "utilities": "missing",
+      "mineral_timber": "missing",
+      "survey": "missing"
+    },
+    "cost": {
+      "usd": 0.001864,
+      "input_tokens": 1491,
+      "output_tokens": 3430,
+      "model": "muse-ember-1.0"
+    },
+    "harness": {
+      "errors": [],
+      "warnings": [],
+      "seconds": 6.3,
+      "prompt_version": "v1"
+    }
+  },
+  "L09": {
+    "got": {
+      "access": "clean",
+      "flood": "missing",
+      "perc_septic": "clean",
+      "water_well": "clean",
+      "liens_tax": "missing",
+      "zoning": "missing",
+      "utilities": "clean",
+      "mineral_timber": "missing",
+      "survey": "missing"
+    },
+    "cost": {
+      "usd": 0.003139,
+      "input_tokens": 1431,
+      "output_tokens": 5992,
+      "model": "muse-ember-1.0"
+    },
+    "harness": {
+      "errors": [],
+      "warnings": [],
+      "seconds": 12.0,
+      "prompt_version": "v1"
+    }
+  },
+  "L10": {
+    "error": "Extra data: line 1 column 2058 (char 2057)"
+  },
+  "L11": {
+    "got": {
+      "access": "missing",
+      "flood": "missing",
+      "perc_septic": "missing",
+      "water_well": "missing",
+      "liens_tax": "problem_stated",
+      "zoning": "missing",
+      "utilities": "missing",
+      "mineral_timber": "missing",
+      "survey": "missing"
+    },
+    "cost": {
+      "usd": 0.001342,
+      "input_tokens": 1431,
+      "output_tokens": 2397,
+      "model": "muse-ember-1.0"
+    },
+    "harness": {
+      "errors": [],
+      "warnings": [],
+      "seconds": 4.4,
+      "prompt_version": "v1"
+    }
+  },
+  "L12": {
+    "got": {
+      "access": "missing",
+      "flood": "missing",
+      "perc_septic": "missing",
+      "water_well": "missing",
+      "liens_tax": "problem_stated",
+      "zoning": "missing",
+      "utilities": "missing",
+      "mineral_timber": "missing",
+      "survey": "missing"
+    },
+    "cost": {
+      "usd": 0.001564,
+      "input_tokens": 1423,
+      "output_tokens": 2843,
+      "model": "muse-ember-1.0"
+    },
+    "harness": {
+      "errors": [],
+      "warnings": [],
+      "seconds": 4.9,
+      "prompt_version": "v1"
+    }
+  }
+}

@@ -1,0 +1,49 @@
+# ParcelCheck spend ledger
+
+**Total spent: $0.00**
+
+Credit allocation: $10.00.
+
+## Allocation table
+
+| Bucket | Allocated (USD) | Spent (USD) | Remaining (USD) |
+|---|---|---|---|
+| Development | 3.00 | 0.00 | 3.00 |
+| Verification | 2.00 | 0.00 | 2.00 |
+| Demo video | 1.00 | 0.00 | 1.00 |
+| Live judge demo reserve (never spent on development) | 2.00 | 0.00 | 2.00 |
+| Final submission day | 1.00 | 0.00 | 1.00 |
+| Unallocated buffer | 1.00 | 0.00 | 1.00 |
+| **Total** | **10.00** | **0.00** | **10.00** |
+
+## Rules
+
+- **Stop rule:** at $8.00 total spent, experimentation stops and only the frozen prompt runs.
+- The live judge demo reserve of $2.00 is never spent on development, verification, or experimentation.
+- Every model call gets one line in the run log below, with the cost taken from the API usage record (the cost field in prompt-draft.md), not estimated.
+
+## Run log
+
+| Date | Bucket | Listing | Prompt version | Model | Input tokens | Output tokens | Cost (USD) | Running total (USD) |
+|---|---|---|---|---|---|---|---|---|
+| 2026-11-24 | (none) | (none) | v0.1-draft | (none) | 0 | 0 | 0.00 | 0.00 |
+
+2026-11-24: day-one prep. No API calls, no model calls, no spend.
+
+2026-11-24, about 18:12 ET: sealed key re-sealed on main chat adjudication, before any model run. L03 and L04 utilities problem to missing (gas alone does not state utilities generally, gas fact kept in the note). L05 survey problem to missing (no survey status stated). L07 note fixed from five missing to six missing, matching its table. L04 perc/septic and water kept clean on "Water and Sewer available", thin basis noted. New hash 688099684502282a3e8805e7caaabeb7ad3b1d611f01479ee3f7a8d78c70e507, verified on Flash and on this VM. New tally counted from the tables: 13 problems stated, 18 clean, 77 missing across 108 rows. That count also corrects the day-one report, which said 17 clean and 75 missing; the tables themselves were right, the count was off by one in each direction. Still $0.00 spent, still no model run.
+
+2026-11-24, 18:11 ET: Vinay confirmed the $10 credits claim is done (his word "done" in the side chat, right after the claim steps). Credits land in batches around 10 AM and 3 PM ET, so the expected landing is the Wed Nov 25 morning batch. Spend stays locked until Billing shows the $10 and the main chat confirms.
+
+2026-11-24, 20:26 ET: Vinay confirmed the $10 credits landed ("we got the $10") and said he is adding the Meta Model API key to Flash OmniRoute himself, with his go to use it after. First spend, once he confirms the key is in: one smoke call on Muse Ember, the Ember rate recorded from Billing, both written into this ledger before any build run. Submission also needs a prompt and token trace as proof of Ember usage and amount spent (event waiver), so every run from the smoke call on gets logged with its prompt version and token counts.
+
+2026-11-24, 20:26 ET: Vinay's Billing screenshot verifies it: "Free credits in use $10.00" on the correct team account (1579961457492318), monthly spend limit set to $10. The same page shows $0.10 spent (1% used) already metered this month, source not yet identified, before any logged ParcelCheck run; and a pre-existing outstanding balance of $0.09 (the October restriction), which the page says will not increase while free credits are in use. An OmniRoute catalog check from here at 20:27 ET returned 401, consistent with Vinay being mid edit on the router; no spend attempted.
+
+2026-11-24, 20:26 to 20:30 ET: Ember access attempts through OmniRoute. Model id found: muse-code/muse-ember-1.0. Every call failed with HTTP 400 from the upstream (unknown parameter max_tokens, then unknown parameter messages), 0 tokens in and out on each, so $0.00 spent by this chat. The failures match Vinay's own OmniRoute test at 20:30 ET: Ember appears to be off until the hackathon start. Vinay's instruction: do not use anything until the start. One OmniRoute model metadata edit made during diagnosis (Ember apiFormat) was reverted from backup the same evening, router left as found. Build spend stays locked until the hackathon start and Ember answers.
+
+2026-11-24, 20:39 ET: EMBER IS LIVE. Smoke call through Muse Code on Flash (muse exec, model muse-ember-1.0, Vinay's own login on the credits team) answered READY. Usage: 32,402 input tokens (that is Muse Code's own system prompt overhead, not ParcelCheck prompt), 13 output, 3 reasoning, 1 call. Ember direct API list rate (Meta pricing, as of 2026-11-12): input $0.10 per million up to 200K input, cached input $0.004 per million, output $0.50 per million; over 200K input the rates triple. Smoke call cost at those rates: about $0.0033. A ParcelCheck run on the direct API (about 1,500 tokens in, 800 out) costs about $0.0006, so the $10 covers on the order of 15,000 checks; the budget is not tight, the trace still gets kept for every run. Route findings, final: OmniRoute cannot carry Ember (its muse-code route posts to the Responses endpoint but never converts the body for imported models, Meta rejects it); this VM's network path to api.meta.ai is refused (tunnel 403) even with the new key in the connector, so the connector route is out too. Working route: direct API calls from Flash, which needs the new key in a file on Flash (Vinay to place it; the key never goes in chat).
+
+2026-11-24, 20:42 to 20:52 ET: DIRECT API LIVE and CALL SHAPE DECIDED. Vinay placed the key at ~/parcelcheck-prep/meta-api-key.txt on Flash (mode 600). Direct smoke (Responses API): 200, READY, 15 in / 15 out, 0.7 s, about $0.000009. Dev/test split set: L01 and L07 are development listings; the verification set is the other ten, untouched. Shape test on L01+L07: (A) one structured pass with the v0.1 draft prompt as written scored 0/9 on both, because the draft references the JSON schema but never pastes it in, so Ember invented its own shape (its statuses were visibly right, the shape was wrong); (B) per-check calls scored 4/9 and 7/9 with five parse failures on L01, at about twice the cost and time. (A2) one structured pass with the exact schema pasted into the prompt: 9/9 on L01 and 9/9 on L07, zero fabricated quotes, $0.0040 and $0.0030 per check (output runs 6 to 8 thousand tokens including reasoning, so a check costs about $0.0035, not the $0.0006 estimated earlier; the $10 still covers roughly 2,800 checks). DECISION: one structured pass, prompt v1 is the draft system prompt plus the full schema pasted in. Spend tonight, all logged: Muse Code smoke $0.0033, direct smoke $0.000009, shape A $0.0048, shape B $0.0094, shape A2 $0.0070. Total about $0.025 of the $10. The $0.10 on the Billing page predates these runs.
+
+2026-11-24, 20:55 ET: CHECKER CORE BUILT. prompt-v1.md and prompt-v1.json frozen on Flash (v1 = draft system prompt plus full schema). checker.py runs one Ember pass, validates the output (nine points, statuses, quote substring check, red flag and missing consistency, seller question coverage), fills the cost from usage, and appends a trace line to runs.jsonl for every run. First core runs: L01 clean, no errors or warnings, $0.0022; L07 clean, no errors or warnings, $0.0024. Cached outputs saved as cached-L01.json and cached-L07.json for the page examples. Running total about $0.030 of $10.
+
+2026-11-24, 21:00 to 21:20 ET: PAGE WIRED AND VERIFICATION RUN COMPLETE. server.py serves the page on Flash at 127.0.0.1:8931 with an explicit path allowlist (answer key and API key return 404, verified) and a 200 runs per day cap; live run through the server on L07 returned the exact six missing items from the key, $0.0022. Page examples are L01 and L07 only, with cached results labeled by date; the L05 example button from the skeleton was removed so no verification listing is spent as an example. VERIFICATION, one clean pass, key hash verified before the run (688099684502282a3e8805e7caaabeb7ad3b1d611f01479ee3f7a8d78c70e507): 78 of 90 points exact matches; problems caught 9 of 11; false problem flags 3; missing items named 55 of 65; clean points called clean 14 of 14; seven listings scored a perfect 9 of 9. The misses, published as they stand in verification-results.md: L03 and L04 each had utilities over-flagged from a gas-only statement, and L03 perc from "Sewer: None"; L10 (Hermitage TN) failed to parse because the model added extra text after the JSON, so its two problems went uncaught and the listing scored zero. Cost of the ten verification runs: $0.0236. Two earlier verification passes aborted on output shape failures and are logged in runs.jsonl; nothing was retried per listing inside the scored pass. runs.jsonl total after 20 logged runs: $0.0509. All-in hackathon spend including the shape tests and smoke calls: about $0.08 of the $10.

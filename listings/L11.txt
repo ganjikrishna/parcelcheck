@@ -1,0 +1,7 @@
+Source: Newton County Tax Commissioner, tax sale listing page (county PDF: Newton-November-2026-Ads-11.2.2026-8-AM.pdf, "NEWTON COUNTY NOVEMBER 2026 TAX SALE (11.2.2026 8 AM)")
+URL: https://newtoncountytax.com/tax-sale-listing/
+Collected: 2026-11-24 (entry verified in the Georgia tax sale watch on 2026-11-02 and 2026-11-03)
+Note: tax sale entries are sparse by design. This is the complete entry as published, no narrative listing text exists for it. This is a November 3, 2026 sale entry, used because December 1, 2026 county parcel lists were not publicly extractable at parcel level (see build plan note in the coordinator report).
+
+Parcel #58: Timely Freight Inc. Parcel ID C061A-00000-004-000. 7.15 acres. 9161 Aaron Dr. Years Due: 2025. No dollar amount or minimum bid shown.
+Sale: November 3, 2026, 10 AM to 4 PM, Newton County Administration Building, 1113 Usher St, First Floor Room 103-A, Covington. Bidder registration from 9:30 AM with government ID. Payment in full in certified funds within 2 hours of sale completion.

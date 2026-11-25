@@ -1,0 +1,5 @@
+meta-api-key.txt
+server-cap.json
+failed-runs.log
+__pycache__/
+*.pyc

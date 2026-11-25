@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ParcelCheck</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; color: #1d1d1d; line-height: 1.45; }
+  h1 { margin-bottom: 0.2rem; }
+  .tagline { margin-top: 0; color: #444; font-style: italic; }
+  .examples button { margin: 0 0.5rem 0.5rem 0; padding: 0.45rem 0.8rem; cursor: pointer; }
+  textarea { width: 100%; min-height: 16rem; font-family: ui-monospace, monospace; font-size: 0.9rem; box-sizing: border-box; }
+  .check { margin-top: 0.6rem; padding: 0.5rem 1rem; }
+  #results { margin-top: 1.5rem; border: 1px solid #bbb; padding: 1rem; border-radius: 6px; }
+  .placeholder { background: #fff7d6; border: 1px dashed #b38f00; padding: 0.8rem; font-weight: 600; }
+  #results section { margin-top: 1rem; }
+  #results h3 { margin: 0 0 0.3rem 0; font-size: 1rem; }
+  .empty { color: #777; }
+  #cost-counter { font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<h1>ParcelCheck</h1>
+<p class="tagline">know what the listing is not telling you, for pennies.</p>
+
+<h2>Try an example listing</h2>
+<div class="examples">
+  <button type="button" data-listing="L01">L01: landlocked, Florida</button>
+  <button type="button" data-listing="L05">L05: floodplain, Sumter SC</button>
+  <button type="button" data-listing="L07">L07: clean, Georgia</button>
+</div>
+
+<h2><label for="listing-input">Paste a land listing</label></h2>
+<textarea id="listing-input" placeholder="Paste the full listing text here."></textarea>
+<button type="button" class="check" id="check-btn" disabled title="Checker not yet connected">Check listing (not connected)</button>
+
+<div id="results" aria-live="polite">
+  <h2>Results</h2>
+  <p class="placeholder" id="placeholder">Checker not yet connected, no credits yet. Example results will appear here once the checker is live.</p>
+  <section id="red-flags">
+    <h3>Red flags with quoted evidence</h3>
+    <ul id="red-flags-list"><li class="empty">None yet.</li></ul>
+  </section>
+  <section id="missing-items">
+    <h3>Missing items</h3>
+    <ul id="missing-items-list"><li class="empty">None yet.</li></ul>
+  </section>
+  <section id="seller-questions">
+    <h3>Seller questions</h3>
+    <ul id="seller-questions-list"><li class="empty">None yet.</li></ul>
+  </section>
+  <section id="cost">
+    <h3>Cost</h3>
+    <p>This run: <span id="cost-counter" data-usd="0">$0.0000</span></p>
+  </section>
+</div>
+
+<script>
+  // Example listing text copied from listings/L01.txt, L05.txt, L07.txt. No network calls.
+  var EXAMPLES = {
+ "L01": "Source: SquareFootHomes.com (BeachesMLS listing, courtesy Pure Equity Realty LLC)\nURL: https://www.squarefoothomes.com/properties/listing/Beaches/B26101567/Unincorporated/0-SW-52nd-Street\nCollected: 2026-11-24\nNote: excerpt of the listing page as retrieved on 2026-11-24, not the full page chrome.\n\n0 SW 52nd Street, Unincorporated, FL 33185\nFor Sale | Agriculture | Active\nPrice: $111,000. 6 Days On Site. Lot Size: 1 Acre. MLS Number: B26101567. Status: Active. Property Tax: $1,351.87.\nSubdivision: MIAMI EVERGLADE LAND COMPANY SUB IN SEC 19. County: Miami-Dade.\n\nApproximately 1 acre (43,560 sq ft) of undeveloped agricultural land in the Miami Everglades Land Co. area near Krome Avenue in unincorporated Miami-Dade County. Approx. 247' x 186' and partially wooded. Zoned AU agricultural. A fit for land investors, neighboring owners, agricultural use, or long-term land banking. Held by the same family for over 30 years; motivated seller seeking a quick sale and will consider a trade for an exotic vehicle. Property is landlocked with no established road access, and no utilities are represented as available. Buyer to independently verify zoning, legal access, easements, permitted uses, environmental restrictions, utilities, and development potential with Miami-Dade County.\n\nGeneral Features: Acres 1. Additional Property Use: Agricultural Unimproved. Property Sub Type: Agriculture. Sewer: Septic Tank. Special Circumstances: Standard. Utilities: None. Water Source: Other. Zoning: 9000. Exterior Features: Fencing None. Other Structures: None. Road Frontage: None. Roads: None. Financing Terms Available: Cash Trade.\n",
+ "L05": "Source: LandCentury.com\nURL: https://www.landcentury.com/land-for-sale/south-carolina/387-acres-for-sale-in-sumter-sc-26345\nCollected: 2026-11-24\nNote: excerpt of the listing page as retrieved in search on 2026-11-24.\n\n3.87 Acres in Sumter, SC - Build, Farm and Homestead for Under $19K\nPrice: $18,900. Size: 3.87 acres (168,577 sq ft). Property taxes $166 / year. Deed: Warranty. Zoning: AC, Agricultural Conservation (allows residential and agricultural development). Road access: Paved Road. Utilities: Well Needed, Septic Needed. HOA: None.\n\nHere is an affordable opportunity to own 3.87 acres of residentially and agriculturally zoned land in Sumter County, South Carolina, offered at just $18,900. With paved road access, no HOA, and ultra-low annual taxes of only $166, this parcel offers genuine flexibility for buyers seeking buildable land in the South Carolina Lowcountry at a price that is hard to beat. The zoning supports homes, mobile homes, manufactured homes, tiny homes, cabins, and personal farming, making this a versatile holding with real long-term potential.\n\nFloodplain and Wetlands, Read Before Purchasing: This parcel is located within a FEMA Zone AE floodplain. Residential and other structures are permitted, but the lowest floor must be elevated at least 2 feet above the FEMA Base Flood Elevation (BFE), and all structures must be properly anchored against flotation, collapse, and lateral movement. Basements are not permitted. Enclosed areas below the required elevation are generally limited to parking, access, or storage and must include compliant flood openings. The exact BFE, floodway boundary, buildable envelope, required elevations, and wetland limits must be confirmed through a survey and engineering review before any construction, septic placement, or site planning.\n\nA well must be drilled and a septic system must be installed, neither is currently present on the property. Placement of septic systems may be affected by floodplain and wetland conditions and will require county review.\n",
+ "L07": "Source: Southern Edge Realty / Jennifer Westmoreland Sells Georgia (MLS 10892951)\nURL: https://southernedgerealty.com/idx/mls-10892951-55_dora_bush_hill_road_carlton_ga_30627\nCollected: 2026-11-24\nNote: excerpt of the listing page as retrieved in search on 2026-11-24. Listed Nov 19, 2026.\n\n55 Dora Bush Hill Road, Carlton, GA 30627\nPrice: $125,000. Lot size: 5.65 Acres. Property type: Land. County: Oglethorpe. Status: Active. Days on Market: 1. Last Updated: 11/19/2026. Taxes: $660.48. Utilities: Cable Available, Electricity Available. Water: Private, Well. Sewer: Perc Test On File.\n\nBeautiful 5.65-Acre Wooded Tract - Ready for Your Dream Home! Escape to the peace and tranquility of country living with this beautiful 5.65-acre wooded tract, conveniently located approximately 30 minutes from Athens, Georgia. Surrounded by natural beauty, this property offers the perfect combination of privacy, seclusion, and convenient access to shopping, dining, and entertainment. The property already features a drilled well, a designated building site, and an approved perc test, giving you a valuable head start toward building your dream home. Enjoy the beauty of trees, abundant wildlife, and plenty of space to create your own private retreat. Property Highlights: 5.65 acres of beautiful wooded land. Existing drilled well. Designated building site. Approved perc test for septic system. Peaceful, private country setting. Approximately 30 minutes from Athens, GA. Ideal for a custom-built home or private country retreat.\n"
+};
+  var box = document.getElementById('listing-input');
+  var buttons = document.querySelectorAll('.examples button');
+  for (var i = 0; i < buttons.length; i++) {
+    buttons[i].addEventListener('click', function () {
+      box.value = EXAMPLES[this.getAttribute('data-listing')];
+      box.focus();
+    });
+  }
+</script>
+</body>
+</html>

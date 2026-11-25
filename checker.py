@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""ParcelCheck checker core. One structured Muse Ember pass per listing,
+harness side validation, quote verification, cost fill, trace logging.
+
+Usage:
+  python3 checker.py <listing-file> [listing-id]
+  python3 checker.py --text '<listing text>' [listing-id]
+
+Reads the API key from ~/parcelcheck-prep/meta-api-key.txt and the frozen
+prompt from ~/parcelcheck-prep/prompt-v1.json. Appends one JSON line per
+run to ~/parcelcheck-prep/runs.jsonl (the prompt and token trace).
+Prints the validated result JSON to stdout.
+"""
+import json, pathlib, re, sys, time, urllib.request, urllib.error
+
+PREP = pathlib.Path.home() / "parcelcheck-prep"
+API = "https://api.meta.ai/v1/responses"
+MODEL = "muse-ember-1.0"
+RATE_IN, RATE_OUT = 0.10 / 1e6, 0.50 / 1e6
+POINTS = ["access", "flood", "perc_septic", "water_well", "liens_tax",
+          "zoning", "utilities", "mineral_timber", "survey"]
+STATUSES = {"problem_stated", "clean", "missing"}
+
+def call_ember(system, user, max_out=8000):
+    key = (PREP / "meta-api-key.txt").read_text().strip()
+    payload = {"model": MODEL,
+               "input": [{"role": "system", "content": system},
+                         {"role": "user", "content": user}],
+               "max_output_tokens": max_out, "store": False}
+    req = urllib.request.Request(API, data=json.dumps(payload).encode(),
+        headers={"Authorization": "Bearer " + key, "content-type": "application/json"})
+    t = time.time()
+    with urllib.request.urlopen(req, timeout=300) as resp:
+        body = json.loads(resp.read())
+    text = ""
+    for item in body.get("output", []):
+        if item.get("type") == "message":
+            for c in item.get("content", []):
+                if c.get("type") == "output_text":
+                    text += c.get("text", "")
+    u = body.get("usage", {})
+    return text, u.get("input_tokens", 0), u.get("output_tokens", 0), round(time.time() - t, 1)
+
+def parse_json(text):
+    text = text.strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```[a-z]*\n|```$", "", text).strip()
+    return json.loads(text)
+
+def validate(result, listing_text):
+    """Harness checks. Returns (errors, warnings). Never edits statuses;
+    a failed quote check is reported, not silently fixed."""
+    errors, warnings = [], []
+    checks = result.get("checks")
+    if not isinstance(checks, list) or len(checks) != 9:
+        errors.append("checks must be a list of exactly 9")
+        return errors, warnings
+    seen = set()
+    for c in checks:
+        p = c.get("point")
+        if p not in POINTS:
+            errors.append(f"unknown point: {p}")
+            continue
+        seen.add(p)
+        if c.get("status") not in STATUSES:
+            errors.append(f"{p}: bad status {c.get('status')}")
+        ev = c.get("evidence", [])
+        if c.get("status") in ("problem_stated", "clean") and not ev:
+            errors.append(f"{p}: {c.get('status')} with no evidence quote")
+        if c.get("status") == "missing" and ev:
+            warnings.append(f"{p}: missing but carries evidence")
+        for q in ev:
+            if q not in listing_text:
+                errors.append(f"{p}: FABRICATED QUOTE: {q[:60]!r}")
+    if seen != set(POINTS):
+        errors.append(f"points covered: {sorted(seen)}")
+    prob = {c["point"] for c in checks if c.get("status") == "problem_stated"}
+    miss = {c["point"] for c in checks if c.get("status") == "missing"}
+    if {r.get("point") for r in result.get("red_flags", [])} != prob:
+        warnings.append("red_flags do not match problem_stated points")
+    if set(result.get("missing_items", [])) != miss:
+        warnings.append("missing_items do not match missing points")
+    qpoints = {q.get("point") for q in result.get("seller_questions", [])}
+    if not miss.issubset(qpoints):
+        warnings.append(f"missing points without a seller question: {sorted(miss - qpoints)}")
+    return errors, warnings
+
+def check(listing_text, listing_id):
+    prompt = json.loads((PREP / "prompt-v1.json").read_text())
+    user = ("Check this listing against the nine points. Return only the JSON object.\n\n"
+            f'<listing id="{listing_id}">\n{listing_text}\n</listing>')
+    raw, i, o, dt = call_ember(prompt["system"], user)
+    result = parse_json(raw)
+    errors, warnings = validate(result, listing_text)
+    usd = round(i * RATE_IN + o * RATE_OUT, 6)
+    result["cost"] = {"usd": usd, "input_tokens": i, "output_tokens": o, "model": MODEL}
+    result["harness"] = {"errors": errors, "warnings": warnings, "seconds": dt,
+                         "prompt_version": prompt["version"]}
+    trace = {"ts": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "listing_id": listing_id,
+             "prompt_version": prompt["version"], "model": MODEL,
+             "input_tokens": i, "output_tokens": o, "usd": usd,
+             "errors": errors, "warnings": warnings}
+    with open(PREP / "runs.jsonl", "a") as f:
+        f.write(json.dumps(trace) + "\n")
+    return result
+
+def main():
+    args = sys.argv[1:]
+    if args and args[0] == "--text":
+        text, lid = args[1], (args[2] if len(args) > 2 else "adhoc")
+    else:
+        path = pathlib.Path(args[0])
+        raw = path.read_text()
+        text = raw.split("\n\n", 1)[1].strip() if "\n\n" in raw else raw
+        lid = args[1] if len(args) > 1 else path.stem
+    result = check(text, lid)
+    print(json.dumps(result, indent=2))
+
+if __name__ == "__main__":
+    main()
